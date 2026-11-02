@@ -1,0 +1,32 @@
+# SYNTHETIC population generator settings. No real user data exists for this prototype.
+# Feature means are in raw units; noise is applied in a transformed (log / logit) space.
+# Product-holding probabilities are cluster-conditional assumptions chosen by the prototype
+# author from the persona table in the clustering design. They are not measured.
+personas:
+  Active Trader:
+    share: 0.18
+    mean: {trades_per_month: 14, days_since_last_txn: 2, sip_share: 0.06, high_risk_share: 0.88, aum_inr: 1500000, monthly_inflow_inr: 60000}
+    holdings: {direct_equity: 0.96, fno: 0.55, mtf: 0.25, liquid_etf: 0.45, core_mf_sip: 0.38, las: 0.33, us_stocks: 0.25, gold_etf: 0.20, index_fund_sip: 0.15, thematic_smallcase: 0.15, liquid_fund: 0.10, fd: 0.06, debt_fund: 0.05}
+  Systematic Saver:
+    share: 0.30
+    mean: {trades_per_month: 1.5, days_since_last_txn: 18, sip_share: 0.85, high_risk_share: 0.30, aum_inr: 400000, monthly_inflow_inr: 15000}
+    holdings: {core_mf_sip: 0.88, index_fund_sip: 0.46, sip_step_up: 0.40, liquid_fund: 0.36, nps: 0.31, direct_equity: 0.30, diversified_smallcase: 0.20, gold_etf: 0.18, fd: 0.18, hybrid_fund: 0.15, debt_fund: 0.10}
+  Hands-on Wealth Builder:
+    share: 0.17
+    mean: {trades_per_month: 4, days_since_last_txn: 9, sip_share: 0.15, high_risk_share: 0.62, aum_inr: 4000000, monthly_inflow_inr: 80000}
+    holdings: {direct_equity: 0.92, core_mf_sip: 0.45, thematic_smallcase: 0.40, gold_etf: 0.40, las: 0.31, diversified_smallcase: 0.30, us_stocks: 0.25, index_fund_sip: 0.20, liquid_etf: 0.15, fd: 0.15, debt_fund: 0.10, fno: 0.10}
+  Dormant / Just-in-time:
+    share: 0.20
+    mean: {trades_per_month: 0.1, days_since_last_txn: 380, sip_share: 0.03, high_risk_share: 0.50, aum_inr: 200000, monthly_inflow_inr: 500}
+    holdings: {direct_equity: 0.55, core_mf_sip: 0.35, index_fund_sip: 0.32, fd: 0.30, thematic_smallcase: 0.15, gold_etf: 0.10, liquid_fund: 0.05, fno: 0.04}
+  Income Preserver:
+    share: 0.15
+    mean: {trades_per_month: 0.5, days_since_last_txn: 35, sip_share: 0.50, high_risk_share: 0.15, aum_inr: 2500000, monthly_inflow_inr: 20000}
+    holdings: {fd: 0.70, debt_fund: 0.52, hybrid_fund: 0.42, swp: 0.36, liquid_fund: 0.34, direct_equity: 0.35, core_mf_sip: 0.30, gold_etf: 0.25, index_fund_sip: 0.20, nps: 0.15}
+noise_sd:   # sd in transformed space: log1p for counts/days, logit for shares, log for money
+  trades_per_month: 0.35
+  days_since_last_txn: 0.40
+  sip_share: 0.60
+  high_risk_share: 0.60
+  aum_inr: 0.45
+  monthly_inflow_inr: 0.50

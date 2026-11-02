@@ -1,0 +1,22 @@
+# Category-level products only. No scheme, AMC or stock is ever named in a recommendation.
+# tier: Low / Medium / High per Yang (2024) as adapted in the clustering design.
+# blocked: true -> the recommender must never output it (hard-coded and unit-tested).
+categories:
+  liquid_fund:        {label: "Liquid fund", tier: Low, surface: Coin, desc: "Very short-term debt fund, often used as an emergency buffer."}
+  debt_fund:          {label: "Debt fund", tier: Low, surface: Coin, desc: "Fund holding bonds; lower volatility than equity, not risk-free."}
+  liquid_etf:         {label: "Liquid ETF", tier: Low, surface: Kite, desc: "Exchange-traded liquid fund; can hold idle cash in a demat account."}
+  fd:                 {label: "FD (off-platform, shown for education)", tier: Low, surface: off-platform, desc: "Bank fixed deposit. Shown for education; the brief treats FDs as off-platform (the founder letter notes FDs are now offered in-app)."}
+  swp:                {label: "Systematic withdrawal plan", tier: Low, surface: Coin, desc: "Regular payouts from a fund, typically a debt or hybrid fund."}
+  index_fund_sip:     {label: "Nifty 50 index fund SIP", tier: Medium, surface: Coin, desc: "Monthly investment into a fund that tracks a broad index."}
+  core_mf_sip:        {label: "Core diversified mutual-fund SIP", tier: Medium, surface: Coin, desc: "Monthly investment into a diversified (e.g. flexi-cap) equity fund."}
+  hybrid_fund:        {label: "Hybrid fund", tier: Medium, surface: Coin, desc: "Fund mixing equity and debt."}
+  gold_etf:           {label: "Gold / silver ETF", tier: Medium, surface: Kite, desc: "Exchange-traded fund tracking gold or silver prices."}
+  diversified_smallcase: {label: "Diversified smallcase", tier: Medium, surface: smallcase, desc: "Basket of stocks/ETFs spread across sectors."}
+  nps:                {label: "NPS", tier: Medium, surface: off-platform, desc: "National Pension System; long lock-in retirement product."}
+  sip_step_up:        {label: "SIP step-up", tier: Medium, surface: Coin, desc: "Raising an existing SIP amount periodically."}
+  direct_equity:      {label: "Direct equity (individual stocks)", tier: High, surface: Kite, desc: "Shares of individual companies."}
+  thematic_smallcase: {label: "Thematic smallcase", tier: High, surface: smallcase, desc: "Concentrated basket around one theme."}
+  us_stocks:          {label: "US stocks", tier: High, surface: Kite, desc: "Shares listed in the US; adds currency risk."}
+  las:                {label: "Loan against securities", tier: Credit, surface: Kite, desc: "Credit product, not an investment. Borrowing against holdings instead of selling them when cash is needed.", liquidity_only: true}
+  fno:                {label: "F&O", tier: High, surface: Kite, desc: "Futures and options.", blocked: true}
+  mtf:                {label: "MTF (margin trading)", tier: High, surface: Kite, desc: "Leveraged buying with broker funding.", blocked: true}

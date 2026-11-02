@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app.py": {
+      "maxDuration": 30,
+      "excludeFiles": "{prototype/backend/tests/**,prototype/frontend/src/**,prototype/frontend/node_modules/**,docs/**,Data_MF_Equity_Indices/**,prototype/data/synthetic_market/**}"
+    }
+  }
+}

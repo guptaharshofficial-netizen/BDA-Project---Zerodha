@@ -1,0 +1,12 @@
+# Render Blueprint: Dashboard -> New -> Blueprint -> pick this repo. Free plan.
+services:
+  - type: web
+    name: yourbroker-ai-portfolio
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: ANTHROPIC_API_KEY   # optional: enables the language-model summary; leave unset otherwise
+        sync: false

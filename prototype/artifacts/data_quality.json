@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-10-31T13:44:35",
+  "equity_mode": "real",
+  "nav_mode": "real",
+  "files": {
+    "MW-NIFTY-50": "MW-NIFTY-50-30-Oct-2026.csv",
+    "MW-NIFTY-500": "MW-NIFTY-500-30-Oct-2026.csv",
+    "MW-NIFTY-BANK": "MW-NIFTY-BANK-30-Oct-2026.csv",
+    "MW-NIFTY-MIDCAP-SELECT": "MW-NIFTY-MIDCAP-SELECT-30-Oct-2026.csv",
+    "MW-NIFTY-TOTAL-MARKET": "MW-NIFTY-TOTAL-MARKET-30-Oct-2026.csv",
+    "MW-NIFTY-MIDCAP-100": "MW-NIFTY-MIDCAP-100-30-Oct-2026.csv",
+    "MW-NIFTY-SMALLCAP-100": "MW-NIFTY-SMALLCAP-100-30-Oct-2026.csv",
+    "NAVAll": "NAVAll.txt"
+  },
+  "universe_size": 751,
+  "nifty500_size": 500,
+  "missing_30d_values": 0,
+  "missing_365d_values": 0,
+  "low_confidence_sector_rows": 251,
+  "low_confidence_examples": [
+    "EQUITASBNK",
+    "PCJEWELLER",
+    "AEROFLEX",
+    "GREAVESCOT",
+    "LOTUSDEV",
+    "APOLLO",
+    "THYROCARE",
+    "STAR",
+    "SENORES",
+    "VGUARD",
+    "SHADOWFAX",
+    "PARAS",
+    "RBA",
+    "TANLA",
+    "SHAILY"
+  ],
+  "nav": {
+    "total_rows": 14441,
+    "dropped_stale_date": 6193,
+    "dropped_not_direct_growth": 6203,
+    "dropped_bad_nav": 10,
+    "kept": 2035,
+    "layout_columns": 8
+  },
+  "notes": [
+    "Benchmark sector mix = share of Nifty 500 constituents by count (equal-weight proxy), not market-cap weights.",
+    "Only 30D and 365D % changes exist for stocks; no multi-year price history.",
+    "Only one day's NAV exists for funds; no fund return can be computed from the dataset.",
+    "Fund AUM, expense ratio and riskometer are not in the dataset and are never shown.",
+    "Optional index files not supplied: MW-NIFTY-MICROCAP-250, MW-NIFTY-MIDCAP-150, MW-NIFTY-SMALLCAP-250. Membership falls back to available indices."
+  ]
+}

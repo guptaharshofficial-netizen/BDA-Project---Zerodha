@@ -1,0 +1,133 @@
+SYMBOL,SECTOR,SOURCE,CONFIDENCE
+HDFCBANK,Financial Services,model knowledge - to be verified against NSE,HIGH
+ICICIBANK,Financial Services,model knowledge - to be verified against NSE,HIGH
+SBIN,Financial Services,model knowledge - to be verified against NSE,HIGH
+KOTAKBANK,Financial Services,model knowledge - to be verified against NSE,HIGH
+AXISBANK,Financial Services,model knowledge - to be verified against NSE,HIGH
+INDUSINDBK,Financial Services,model knowledge - to be verified against NSE,HIGH
+BANKBARODA,Financial Services,model knowledge - to be verified against NSE,HIGH
+PNB,Financial Services,model knowledge - to be verified against NSE,HIGH
+CANBK,Financial Services,model knowledge - to be verified against NSE,HIGH
+UNIONBANK,Financial Services,model knowledge - to be verified against NSE,HIGH
+INDIANB,Financial Services,model knowledge - to be verified against NSE,HIGH
+BANKINDIA,Financial Services,model knowledge - to be verified against NSE,HIGH
+FEDERALBNK,Financial Services,model knowledge - to be verified against NSE,HIGH
+IDFCFIRSTB,Financial Services,model knowledge - to be verified against NSE,HIGH
+AUBANK,Financial Services,model knowledge - to be verified against NSE,HIGH
+BANDHANBNK,Financial Services,model knowledge - to be verified against NSE,HIGH
+YESBANK,Financial Services,model knowledge - to be verified against NSE,HIGH
+BAJFINANCE,Financial Services,model knowledge - to be verified against NSE,HIGH
+BAJAJFINSV,Financial Services,model knowledge - to be verified against NSE,HIGH
+SHRIRAMFIN,Financial Services,model knowledge - to be verified against NSE,HIGH
+CHOLAFIN,Financial Services,model knowledge - to be verified against NSE,HIGH
+MUTHOOTFIN,Financial Services,model knowledge - to be verified against NSE,HIGH
+HDFCLIFE,Financial Services,model knowledge - to be verified against NSE,HIGH
+SBILIFE,Financial Services,model knowledge - to be verified against NSE,HIGH
+ICICIPRULI,Financial Services,model knowledge - to be verified against NSE,HIGH
+ICICIGI,Financial Services,model knowledge - to be verified against NSE,HIGH
+LICI,Financial Services,model knowledge - to be verified against NSE,HIGH
+PFC,Financial Services,model knowledge - to be verified against NSE,HIGH
+RECLTD,Financial Services,model knowledge - to be verified against NSE,HIGH
+IRFC,Financial Services,model knowledge - to be verified against NSE,HIGH
+JIOFIN,Financial Services,model knowledge - to be verified against NSE,HIGH
+HDFCAMC,Financial Services,model knowledge - to be verified against NSE,HIGH
+BSE,Financial Services,model knowledge - to be verified against NSE,HIGH
+CDSL,Financial Services,model knowledge - to be verified against NSE,HIGH
+MCX,Financial Services,model knowledge - to be verified against NSE,HIGH
+ANGELONE,Financial Services,model knowledge - to be verified against NSE,HIGH
+TCS,IT,model knowledge - to be verified against NSE,HIGH
+INFY,IT,model knowledge - to be verified against NSE,HIGH
+HCLTECH,IT,model knowledge - to be verified against NSE,HIGH
+WIPRO,IT,model knowledge - to be verified against NSE,HIGH
+TECHM,IT,model knowledge - to be verified against NSE,HIGH
+LTIM,IT,model knowledge - to be verified against NSE,HIGH
+PERSISTENT,IT,model knowledge - to be verified against NSE,HIGH
+COFORGE,IT,model knowledge - to be verified against NSE,HIGH
+MPHASIS,IT,model knowledge - to be verified against NSE,HIGH
+OFSS,IT,model knowledge - to be verified against NSE,HIGH
+KPITTECH,IT,model knowledge - to be verified against NSE,HIGH
+TATAELXSI,IT,model knowledge - to be verified against NSE,HIGH
+RELIANCE,Energy,model knowledge - to be verified against NSE,HIGH
+ONGC,Energy,model knowledge - to be verified against NSE,HIGH
+BPCL,Energy,model knowledge - to be verified against NSE,HIGH
+IOC,Energy,model knowledge - to be verified against NSE,HIGH
+HINDPETRO,Energy,model knowledge - to be verified against NSE,HIGH
+GAIL,Energy,model knowledge - to be verified against NSE,HIGH
+OIL,Energy,model knowledge - to be verified against NSE,HIGH
+PETRONET,Energy,model knowledge - to be verified against NSE,HIGH
+COALINDIA,Energy,model knowledge - to be verified against NSE,MEDIUM
+HINDUNILVR,FMCG,model knowledge - to be verified against NSE,HIGH
+ITC,FMCG,model knowledge - to be verified against NSE,HIGH
+NESTLEIND,FMCG,model knowledge - to be verified against NSE,HIGH
+BRITANNIA,FMCG,model knowledge - to be verified against NSE,HIGH
+TATACONSUM,FMCG,model knowledge - to be verified against NSE,HIGH
+DABUR,FMCG,model knowledge - to be verified against NSE,HIGH
+MARICO,FMCG,model knowledge - to be verified against NSE,HIGH
+GODREJCP,FMCG,model knowledge - to be verified against NSE,HIGH
+COLPAL,FMCG,model knowledge - to be verified against NSE,HIGH
+VBL,FMCG,model knowledge - to be verified against NSE,HIGH
+UNITDSPR,FMCG,model knowledge - to be verified against NSE,HIGH
+MARUTI,Auto,model knowledge - to be verified against NSE,HIGH
+M&M,Auto,model knowledge - to be verified against NSE,HIGH
+TATAMOTORS,Auto,model knowledge - to be verified against NSE,HIGH
+BAJAJ-AUTO,Auto,model knowledge - to be verified against NSE,HIGH
+EICHERMOT,Auto,model knowledge - to be verified against NSE,HIGH
+HEROMOTOCO,Auto,model knowledge - to be verified against NSE,HIGH
+TVSMOTOR,Auto,model knowledge - to be verified against NSE,HIGH
+ASHOKLEY,Auto,model knowledge - to be verified against NSE,HIGH
+BOSCHLTD,Auto,model knowledge - to be verified against NSE,HIGH
+MOTHERSON,Auto,model knowledge - to be verified against NSE,HIGH
+BHARATFORG,Auto,model knowledge - to be verified against NSE,MEDIUM
+LT,Capital Goods,model knowledge - to be verified against NSE,HIGH
+SIEMENS,Capital Goods,model knowledge - to be verified against NSE,HIGH
+ABB,Capital Goods,model knowledge - to be verified against NSE,HIGH
+BEL,Capital Goods,model knowledge - to be verified against NSE,HIGH
+HAL,Capital Goods,model knowledge - to be verified against NSE,HIGH
+BHEL,Capital Goods,model knowledge - to be verified against NSE,HIGH
+CUMMINSIND,Capital Goods,model knowledge - to be verified against NSE,HIGH
+POLYCAB,Capital Goods,model knowledge - to be verified against NSE,HIGH
+HAVELLS,Capital Goods,model knowledge - to be verified against NSE,MEDIUM
+CGPOWER,Capital Goods,model knowledge - to be verified against NSE,HIGH
+MAZDOCK,Capital Goods,model knowledge - to be verified against NSE,HIGH
+SUNPHARMA,Healthcare,model knowledge - to be verified against NSE,HIGH
+CIPLA,Healthcare,model knowledge - to be verified against NSE,HIGH
+DRREDDY,Healthcare,model knowledge - to be verified against NSE,HIGH
+DIVISLAB,Healthcare,model knowledge - to be verified against NSE,HIGH
+APOLLOHOSP,Healthcare,model knowledge - to be verified against NSE,HIGH
+LUPIN,Healthcare,model knowledge - to be verified against NSE,HIGH
+AUROPHARMA,Healthcare,model knowledge - to be verified against NSE,HIGH
+TORNTPHARM,Healthcare,model knowledge - to be verified against NSE,HIGH
+ZYDUSLIFE,Healthcare,model knowledge - to be verified against NSE,HIGH
+MAXHEALTH,Healthcare,model knowledge - to be verified against NSE,HIGH
+TATASTEEL,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+JSWSTEEL,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+HINDALCO,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+VEDL,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+SAIL,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+NMDC,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+JINDALSTEL,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+NATIONALUM,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+HINDZINC,Metals & Mining,model knowledge - to be verified against NSE,HIGH
+BHARTIARTL,Telecom,model knowledge - to be verified against NSE,HIGH
+IDEA,Telecom,model knowledge - to be verified against NSE,HIGH
+INDUSTOWER,Telecom,model knowledge - to be verified against NSE,HIGH
+TATACOMM,Telecom,model knowledge - to be verified against NSE,MEDIUM
+NTPC,Utilities,model knowledge - to be verified against NSE,HIGH
+POWERGRID,Utilities,model knowledge - to be verified against NSE,HIGH
+TATAPOWER,Utilities,model knowledge - to be verified against NSE,HIGH
+ADANIPOWER,Utilities,model knowledge - to be verified against NSE,HIGH
+ADANIGREEN,Utilities,model knowledge - to be verified against NSE,HIGH
+NHPC,Utilities,model knowledge - to be verified against NSE,HIGH
+JSWENERGY,Utilities,model knowledge - to be verified against NSE,HIGH
+TORNTPOWER,Utilities,model knowledge - to be verified against NSE,HIGH
+ULTRACEMCO,Others,model knowledge - to be verified against NSE,MEDIUM
+GRASIM,Others,model knowledge - to be verified against NSE,MEDIUM
+ASIANPAINT,Others,model knowledge - to be verified against NSE,MEDIUM
+TITAN,Others,model knowledge - to be verified against NSE,MEDIUM
+TRENT,Others,model knowledge - to be verified against NSE,MEDIUM
+DMART,Others,model knowledge - to be verified against NSE,MEDIUM
+ADANIENT,Others,model knowledge - to be verified against NSE,MEDIUM
+ADANIPORTS,Others,model knowledge - to be verified against NSE,MEDIUM
+INDIGO,Others,model knowledge - to be verified against NSE,MEDIUM
+DLF,Others,model knowledge - to be verified against NSE,MEDIUM
+ETERNAL,Others,model knowledge - to be verified against NSE,MEDIUM

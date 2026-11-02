@@ -1,0 +1,81 @@
+# All tunable thresholds live here (config over code). Values are prototype defaults,
+# to be re-derived on real data before any production use.
+versions:
+  model_version: "clust-1.0.0"
+  rules_version: "rules-1.0.0"
+  data_asof: "2026-10-30"
+  notice_version: "notice-2026-10-31-v1"
+
+paths:
+  # Real NSE / AMFI files are used if present here (relative to prototype/).
+  real_data_dir: "../Data_MF_Equity_Indices"
+  synthetic_data_dir: "data/synthetic_market"
+  artifacts_dir: "artifacts"
+  audit_log: "audit.jsonl"
+  cache_dir: "data/cache"
+
+data:
+  nav_keep_date: "30-Oct-2026"       # keep only NAV rows dated this day
+  small_sector_n: 8                  # sectors with fewer constituents get a small-sample caveat
+  index_files:                       # file stem -> display name
+    MW-NIFTY-50: "NIFTY 50"
+    MW-NIFTY-500: "NIFTY 500"
+    MW-NIFTY-BANK: "NIFTY BANK"
+    MW-NIFTY-MICROCAP-250: "NIFTY MICROCAP 250"
+    MW-NIFTY-MIDCAP-150: "NIFTY MIDCAP 150"
+    MW-NIFTY-MIDCAP-SELECT: "NIFTY MIDCAP SELECT"
+    MW-NIFTY-SMALLCAP-250: "NIFTY SMALLCAP 250"
+    # optional extras, used when present (only NIFTY 500 is required for real mode)
+    MW-NIFTY-TOTAL-MARKET: "NIFTY TOTAL MARKET"
+    MW-NIFTY-MIDCAP-100: "NIFTY MIDCAP 100"
+    MW-NIFTY-SMALLCAP-100: "NIFTY SMALLCAP 100"
+
+population:
+  n_users: 3000
+  seed: 20261030
+  messy_share: 0.12                  # users sampled between two personas
+
+clustering:
+  k_range: [2, 8]
+  preferred_k: 5
+  expected_k_range: [4, 6]          # from Thompson 2021 / Kumar 2018; outside-range optimum is flagged
+  n_init: 20
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  persona_match_tolerance: 0.9      # max RMS distance (band units) to accept a persona name
+
+recommender:
+  adoption_threshold: 0.30           # min share of cluster that uses a category
+  max_suggestions: 3
+  min_cohort: 50                     # never show a cluster statistic below this
+  idle_cash_threshold_inr: 200000    # idle cash above this triggers the liquid-ETF rule
+
+guardrails:
+  new_user_direct_equity_cap: 0.20   # share of stated budget
+  senior_age: 60
+  short_horizon_years: 3             # horizons under this cap High-tier suggestions
+  min_horizon_any_risk_years: 1      # horizon under this -> Low tier only
+  overconcentrated_sector_pts: 10    # sector this many pts above benchmark = over-concentrated
+
+risk_score:
+  weights: {tier: 0.45, concentration: 0.25, horizon: 0.15, capacity: 0.15}
+  tier_points: {Low: 0, Medium: 50, High: 100}
+  single_stock_floor: 0.10           # top holding weight below this scores 0
+  single_stock_cap: 0.40             # top holding weight at/above this scores 100
+  horizon_allowance: {"<1": 0, "1-3": 35, "3-5": 65, "5+": 100}
+  bands: [25, 50, 75]                # 0-25 Low, 25-50 Medium-low, 50-75 Medium-high, 75-100 High
+
+summary:
+  llm_model: "claude-sonnet-5-5"
+  llm_max_tokens: 700
+
+# Live headlines for "What's happening?" (Google News RSS search). Needs the app's computer to be online.
+news:
+  enabled: true
+  days: 14          # only headlines from the last N days
+  timeout_s: 5
+
+# "Go to app" hand-off buttons. The prototype never places orders: the button opens the app's site in a new tab
+# and copies the stock symbol / fund name so the user can paste it into the app's search.
+app_links:
+  stock: { app: "Kite", url: "https://kite.zerodha.com/" }
+  fund:  { app: "Coin", url: "https://coin.zerodha.com/funds" }

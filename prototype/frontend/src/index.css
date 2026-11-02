@@ -1,0 +1,17 @@
+@import "@fontsource-variable/inter";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { -webkit-text-size-adjust: 100%; }
+body { @apply bg-canvas text-ink antialiased; font-feature-settings: "cv11", "ss01"; }
+:focus-visible { outline: 2px solid #387ed1; outline-offset: 2px; }
+input:focus-visible, select:focus-visible { outline: none; }
+input:focus, select:focus { box-shadow: 0 0 0 3px #ebf3fc; border-color: #387ed1; }
+.grid > * { min-width: 0; }
+.num { font-variant-numeric: tabular-nums; }
+input[type=range] { accent-color: #387ed1; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+/* leave room for the phone-style bottom tab bar */
+@media (max-width: 767px) { .has-bottom-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom)); } }

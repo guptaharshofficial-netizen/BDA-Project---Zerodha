@@ -1,0 +1,5 @@
+frontend/node_modules/
+audit.jsonl
+data/cache/*.json
+__pycache__/
+.pytest_cache/

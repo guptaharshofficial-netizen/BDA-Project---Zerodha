@@ -1,0 +1,55 @@
+# ILLUSTRATIVE concrete holdings for the test users, built to match the descriptions and
+# aum / high_risk_share values in test_users.yaml. Instruments are picked from the loaded
+# universe by rule (pick: ...) so this works with real or synthetic market files.
+# Demo goals and suitability answers are illustrative defaults; the user can edit them.
+U01:
+  holdings:
+    - {type: fund, pick: {assumption_key: equity_flexi, category_like: "Flexi Cap", nth: 0}, value: 130000, sip_monthly: 6000, label: "Flexi-cap fund A (SIP)"}
+    - {type: fund, pick: {assumption_key: equity_flexi, category_like: "Flexi Cap", nth: 1}, value: 130000, sip_monthly: 6000, label: "Flexi-cap fund B (SIP)"}
+    - {type: stock, pick: {index: NIFTY_MIDCAP_150, sector: IT, nth: 0}, value: 40000}
+    - {type: stock, pick: {index: NIFTY_MIDCAP_150, sector: IT, nth: 1}, value: 40000}
+    - {type: stock, pick: {index: NIFTY_MIDCAP_150, sector: Capital Goods, nth: 0}, value: 40000}
+    - {type: stock, pick: {index: NIFTY_MIDCAP_150, sector: Financial Services, nth: 0}, value: 40000}
+  goals:
+    - {name: "Home down payment", target: 1500000, years: 6, monthly: 12000, priority: 1}
+    - {name: "Emergency fund", target: 200000, years: 1, monthly: 0, priority: 2}
+  suitability: {market_fall_20pct: hold, horizon: 5+ years, monthly_surplus: 5k-25k, emi_inr: 0, emergency_months: 1}
+U02:
+  holdings:
+    - {type: stock, pick: {psu_bank: true, nth: 0}, value: 600000}
+    - {type: stock, pick: {psu_bank: true, nth: 1}, value: 550000}
+    - {type: stock, pick: {psu_bank: true, nth: 2}, value: 500000}
+    - {type: stock, pick: {index: NIFTY_50, sector: Capital Goods, nth: 0}, value: 650000}
+    - {type: stock, pick: {index: NIFTY_50, sector: Energy, nth: 0}, value: 600000}
+    - {type: stock, pick: {index: NIFTY_50, sector: Metals & Mining, nth: 0}, value: 600000}
+  fno_overlay: {description: "Index options (bought), open positions", premium_at_risk_inr: 120000, positions: 4}
+  idle_cash_inr: 1800000
+  goals:
+    - {name: "Business expansion buffer", target: 2500000, years: 2, monthly: 50000, priority: 1}
+    - {name: "Children's education", target: 4000000, years: 9, monthly: 40000, priority: 2}
+  suitability: {market_fall_20pct: buy more, horizon: 3-5 years, monthly_surplus: 1L+, emi_inr: 0, emergency_months: 6}
+U03:
+  holdings:
+    - {type: stock, pick: {index: NIFTY_50, sector: Financial Services, nth: 1}, value: 300000, label_suffix: "(inherited)"}
+    - {type: stock, pick: {index: NIFTY_50, sector: Energy, nth: 1}, value: 300000, label_suffix: "(inherited)"}
+    - {type: stock, pick: {index: NIFTY_50, sector: FMCG, nth: 0}, value: 300000, label_suffix: "(inherited)"}
+    - {type: fund, pick: {assumption_key: hybrid, category_like: "Aggressive Hybrid", nth: 0}, value: 100000, sip_monthly: 5000, label: "Hybrid fund (SIP)"}
+  off_platform_declarable: {label: "Bank FDs", category: fd, value: 2200000}
+  goals:
+    - {name: "Regular income top-up", target: 600000, years: 2, monthly: 5000, priority: 1}
+    - {name: "Medical reserve", target: 500000, years: 1, monthly: 0, priority: 2}
+  suitability: {market_fall_20pct: wait, horizon: 1-3 years, monthly_surplus: 5k-25k, emi_inr: 0, emergency_months: 12}
+U05:
+  holdings:
+    - {type: stock, pick: {index: NIFTY_SMALLCAP_250, sector: Auto, nth: 0}, value: 70000}
+    - {type: stock, pick: {index: NIFTY_SMALLCAP_250, sector: IT, nth: 0}, value: 60000}
+    - {type: stock, pick: {index: NIFTY_MIDCAP_150, sector: Healthcare, nth: 0}, value: 70000}
+    - {type: stock, pick: {index: NIFTY_50, sector: Financial Services, nth: 2}, value: 60000}
+    - {type: smallcase, name: "Thematic EV smallcase (illustrative)", category: thematic_smallcase, value: 170000,
+       lookthrough: {Auto: 0.6, Capital Goods: 0.25, Metals & Mining: 0.15}}
+    - {type: fund, pick: {assumption_key: equity_flexi, category_like: "Flexi Cap", nth: 2}, value: 250000, sip_monthly: 0, sip_status: "stopped 2023", label: "Flexi-cap fund (SIP stopped 2023)"}
+  goals:
+    - {name: "Long-term wealth", target: 3000000, years: 12, monthly: 0, priority: 1}
+  suitability: {market_fall_20pct: hold, horizon: 5+ years, monthly_surplus: 25k-1L, emi_inr: 30000, emergency_months: 3}
+# SIMULATED ~3 months of history for U04 (Rohan), used only by the "switch to computed profile" demo toggle.
+U04_simulated: {trades_per_month: 9, days_since_last_txn: 1, sip_share: 0.25, high_risk_share: 0.7, aum_inr: 90000, monthly_inflow_inr: 15000}

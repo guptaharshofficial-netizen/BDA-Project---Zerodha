@@ -1,0 +1,78 @@
+# Verbatim from the clustering design ("Prompt-ready data for Claude Code"), via the build prompt §4.4.
+users:
+  - id: U01
+    name: Ananya Iyer
+    age: 27
+    city: Bengaluru
+    occupation: Product designer
+    track: existing
+    platforms: [Coin, Kite]
+    trades_per_month: 4.5
+    days_since_last_txn: 4
+    sip_share_of_inflows: 0.67
+    high_risk_share: 0.38
+    aum_inr: 420000
+    monthly_inflow_inr: 18000
+    holdings: [flexi-cap fund A (SIP), flexi-cap fund B (SIP), 4 mid-cap stocks]
+    expected_profile: {activity: 3, automation: 3, risk: 3, capacity: 2}
+  - id: U02
+    name: Harpreet Singh Gill
+    age: 44
+    city: Ludhiana
+    occupation: Business owner, hardware distribution
+    track: existing
+    platforms: [Kite]
+    trades_per_month: 15
+    days_since_last_txn: 1
+    sip_share_of_inflows: 0.0
+    high_risk_share: 1.0
+    aum_inr: 3500000
+    idle_cash_inr: 1800000
+    monthly_inflow_inr: 100000
+    holdings: [6 stocks incl. 3 PSU banks, index options positions]
+    expected_profile: {activity: 4, automation: 1, risk: 4, capacity: 4}
+  - id: U03
+    name: Meenakshi Sundaram
+    age: 61
+    city: Chennai
+    occupation: Retired school principal
+    track: existing
+    platforms: [Kite, Coin]
+    trades_per_month: 0
+    days_since_last_txn: 12
+    sip_share_of_inflows: 1.0
+    high_risk_share: 0.9
+    aum_inr: 1000000
+    monthly_inflow_inr: 5000
+    holdings: [3 inherited large-cap stocks, hybrid fund (SIP)]
+    off_platform: bank FDs of about 22 lakh, not visible to the system
+    expected_profile: {activity: 1, automation: 4, risk: 4, capacity: 3}
+  - id: U04
+    name: Rohan Deshmukh
+    age: 23
+    city: Pune
+    occupation: Software engineer, first job
+    track: new
+    quiz:
+      check_frequency: daily
+      invest_style: pick it myself
+      market_fall_20pct: buy more
+      horizon: 5+ years
+      monthly_surplus: 5k-25k
+      already_holds: none
+    expected_profile: {activity: 4, automation: 1, risk: 4, capacity: 2}
+  - id: U05
+    name: Farah Qureshi
+    age: 35
+    city: Hyderabad
+    occupation: Anaesthesiologist
+    track: existing
+    platforms: [Kite, Coin, smallcase]
+    trades_per_month: 0
+    days_since_last_txn: 430
+    sip_share_of_inflows: 0.0
+    high_risk_share: 0.63
+    aum_inr: 680000
+    monthly_inflow_inr: 0
+    holdings: [4 stocks, thematic EV smallcase, flexi-cap fund (SIP stopped 2023)]
+    expected_profile: {activity: 1, automation: 1, risk: 3, capacity: 3}

@@ -1,0 +1,16 @@
+# Annual return ASSUMPTIONS for scenario mode. These are placeholders chosen by the prototype
+# author for illustration. They are NOT forecasts, NOT measured from the dataset, and must be
+# reviewed by a qualified person before any real use. Format: [conservative, base, optimistic] in % p.a.
+assumptions:
+  direct_equity:   {values: [-2, 9, 16], note: "Placeholder. Single stocks can lose far more than the conservative case."}
+  equity_large:    {values: [3, 9, 13], note: "Placeholder for large-cap / index equity funds."}
+  equity_flexi:    {values: [2, 10, 14], note: "Placeholder for flexi/multi-cap equity funds."}
+  equity_mid:      {values: [0, 11, 16], note: "Placeholder for mid-cap funds; wider spread."}
+  equity_small:    {values: [-3, 12, 18], note: "Placeholder for small-cap funds; widest equity spread."}
+  equity_thematic: {values: [-5, 10, 18], note: "Placeholder for sectoral/thematic funds."}
+  hybrid:          {values: [3, 8, 11], note: "Placeholder for hybrid funds."}
+  debt:            {values: [5, 6.5, 7.5], note: "Placeholder for debt funds; credit and rate risk exist."}
+  liquid:          {values: [5, 6, 6.8], note: "Placeholder for liquid / overnight funds."}
+  gold:            {values: [0, 7, 12], note: "Placeholder for gold/silver ETFs."}
+  index_etf:       {values: [3, 9, 13], note: "Placeholder for equity index ETFs."}
+  international:   {values: [0, 9, 14], note: "Placeholder for international FoFs; includes currency effects."}

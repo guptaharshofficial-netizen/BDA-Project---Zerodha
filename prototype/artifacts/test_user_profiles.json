@@ -1,0 +1,134 @@
+[
+  {
+    "id": "U01",
+    "name": "Ananya Iyer",
+    "basis": "platform data (Track B)",
+    "expected": {
+      "activity": 3,
+      "automation": 3,
+      "risk": 3,
+      "capacity": 2
+    },
+    "computed": {
+      "activity": 4,
+      "automation": 3,
+      "risk": 2,
+      "capacity": 2
+    },
+    "diff": {
+      "activity": 1,
+      "automation": 0,
+      "risk": -1,
+      "capacity": 0
+    },
+    "flagged": [],
+    "cluster": 2,
+    "cluster_name": "Systematic Saver"
+  },
+  {
+    "id": "U02",
+    "name": "Harpreet Singh Gill",
+    "basis": "platform data (Track B)",
+    "expected": {
+      "activity": 4,
+      "automation": 1,
+      "risk": 4,
+      "capacity": 4
+    },
+    "computed": {
+      "activity": 4,
+      "automation": 1,
+      "risk": 4,
+      "capacity": 4
+    },
+    "diff": {
+      "activity": 0,
+      "automation": 0,
+      "risk": 0,
+      "capacity": 0
+    },
+    "flagged": [],
+    "cluster": 1,
+    "cluster_name": "Active Trader"
+  },
+  {
+    "id": "U03",
+    "name": "Meenakshi Sundaram",
+    "basis": "platform data (Track B)",
+    "expected": {
+      "activity": 1,
+      "automation": 4,
+      "risk": 4,
+      "capacity": 3
+    },
+    "computed": {
+      "activity": 2,
+      "automation": 4,
+      "risk": 4,
+      "capacity": 2
+    },
+    "diff": {
+      "activity": 1,
+      "automation": 0,
+      "risk": 0,
+      "capacity": -1
+    },
+    "flagged": [],
+    "cluster": 2,
+    "cluster_name": "Systematic Saver"
+  },
+  {
+    "id": "U04",
+    "name": "Rohan Deshmukh",
+    "basis": "quiz (Track A)",
+    "expected": {
+      "activity": 4,
+      "automation": 1,
+      "risk": 4,
+      "capacity": 2
+    },
+    "computed": {
+      "activity": 4,
+      "automation": 1,
+      "risk": 4,
+      "capacity": 2
+    },
+    "diff": {
+      "activity": 0,
+      "automation": 0,
+      "risk": 0,
+      "capacity": 0
+    },
+    "flagged": [],
+    "cluster": 1,
+    "cluster_name": "Active Trader"
+  },
+  {
+    "id": "U05",
+    "name": "Farah Qureshi",
+    "basis": "platform data (Track B)",
+    "expected": {
+      "activity": 1,
+      "automation": 1,
+      "risk": 3,
+      "capacity": 3
+    },
+    "computed": {
+      "activity": 1,
+      "automation": 1,
+      "risk": 3,
+      "capacity": 1
+    },
+    "diff": {
+      "activity": 0,
+      "automation": 0,
+      "risk": 0,
+      "capacity": -2
+    },
+    "flagged": [
+      "capacity"
+    ],
+    "cluster": 0,
+    "cluster_name": "Dormant / Just-in-time"
+  }
+]
