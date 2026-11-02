@@ -15,6 +15,8 @@ export default function Welcome() {
   return (
     <div className="max-w-5xl mx-auto">
       <section className="text-center pt-4 sm:pt-10 pb-8">
+        <img src="/logo-full.png" alt="Tulana, Portfolio Navigator" className="h-20 sm:h-28 w-auto mx-auto mb-1" />
+        <div className="text-[11px] text-ink-faint mb-4">Powered by Zerodha</div>
         <span className="inline-block text-xs font-semibold text-brand-ink bg-brand-soft px-3 py-1 rounded-full">Portfolio insights · demo</span>
         <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mt-4">Invest with a clearer picture.</h1>
         <p className="text-ink-soft text-base sm:text-lg mt-3 max-w-2xl mx-auto">

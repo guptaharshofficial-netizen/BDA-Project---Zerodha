@@ -129,9 +129,9 @@ export default function App() {
       <div className={`min-h-screen flex flex-col ${tabs.length ? "has-bottom-nav" : ""}`}>
         <header className="bg-white border-b border-line sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
-            <button onClick={() => { setMode("welcome"); setMenu(false); }} className="flex items-center gap-2 font-semibold text-[17px] tracking-tight shrink-0" aria-label="YourBroker home">
-              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden><path d="M3 20 L11 4 L14 10 L9 20 Z" fill="#ff5722" /><path d="M12 20 L16 12 L21 20 Z" fill="#387ed1" /></svg>
-              <span>YourBroker</span>
+            <button onClick={() => { setMode("welcome"); setMenu(false); }} className="flex items-center gap-2 font-semibold text-[17px] tracking-tight shrink-0" aria-label="Tulana home">
+              <img src="/logo-icon.png" alt="" className="h-8 w-auto" />
+              <span className="text-[#14295c] text-[22px] font-bold lowercase tracking-tight leading-none">tulana</span>
             </button>
             <Ticker items={meta.indices ?? []} />
             <nav aria-label="Main" className="hidden md:flex ml-auto h-14 text-[14px]">
@@ -248,7 +248,7 @@ export function TrackingPrompt({ onDone }: { onDone: () => void }) {
     <div role="dialog" aria-modal="true" aria-label="Tracking permission" className="fixed inset-0 z-[60] bg-black/40 grid place-items-center p-6">
       <div className="bg-white/95 backdrop-blur rounded-2xl w-full max-w-[300px] text-center shadow-pop overflow-hidden">
         <div className="px-5 pt-5 pb-4">
-          <div className="text-[15px] font-semibold leading-snug">Allow "YourBroker" to track your activity across other companies' apps and websites?</div>
+          <div className="text-[15px] font-semibold leading-snug">Allow "Tulana" to track your activity across other companies' apps and websites?</div>
           <p className="text-[13px] text-ink-soft mt-2">This would let us use what you do in other apps for ads. This prototype doesn't need it: your analysis is exactly the same either way.</p>
         </div>
         <button type="button" className="w-full border-t border-line py-3 text-[15px] text-brand font-semibold hover:bg-gray-50" onClick={() => choose(false)}>Ask App Not to Track</button>

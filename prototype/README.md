@@ -1,6 +1,6 @@
-# YourBroker · AI Portfolio Analysis & Recommendation Tool (academic prototype)
+# Tulana · AI Portfolio Analysis & Recommendation Tool (academic prototype)
 
-This is a working prototype of an optional intelligence layer across Kite, Coin and smallcase, shown under the neutral name "YourBroker". It does five things:
+This is a working prototype of an optional intelligence layer across Kite, Coin and smallcase, shown under the name "Tulana". It does five things:
 - places a user in a behavioural cluster
 - shows sector diversification and a transparent risk score
 - lets the user try what-if investments
