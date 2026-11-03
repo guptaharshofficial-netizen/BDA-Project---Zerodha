@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { useApp } from "../App";
 import { inr, inrShort } from "../api";
-import { Badge, Button, Card, Disclaimer, fitLevel, Info, Modal, NewsList, PALETTE, RecCard, Ret, RiskMeter, RISK_WORDS } from "../ui";
+import { Badge, Button, Card, Disclaimer, fitLevel, Info, Modal, NewsList, PALETTE, Ret, RiskMeter, RISK_WORDS } from "../ui";
+import { SuggestionCards } from "../components/Compliance";
 import { icon, SectorMix } from "../components/Market";
 
 const SPREAD: Record<string, string> = { Low: "Well spread", Moderate: "Somewhat concentrated", High: "Concentrated" };
 
 export default function Overview() {
-  const { analysis: a, openLesson, setTab, reloadExisting } = useApp();
+  const { analysis: a, openLesson, setTab, reloadExisting, lastUpdated } = useApp();
   const [showNo, setShowNo] = useState(false);
   const [newsFor, setNewsFor] = useState<any>(null);
   if (!a) return null;
@@ -19,8 +20,9 @@ export default function Overview() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm text-ink-faint">Hi {a.user.name.split(" ")[0]} · {a.user.platforms.join(", ")} connected · data as of 30 Oct 2026</p>
+        <p className="text-sm text-ink-faint">Hi {a.user.name.split(" ")[0]} · {a.user.platforms.join(", ")} linked · updated {lastUpdated ? lastUpdated.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "just now"} · market data as of 30 Oct 2026</p>
         <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Your portfolio health check</h1>
+        <p className="text-xs text-ink-faint mt-1">Updates automatically each time you open Tulana or come back from Kite or Coin.</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-3">
@@ -54,7 +56,7 @@ export default function Overview() {
 
       <Card title="Options to explore" subtitle="Types of investment that could fit you. We don't name specific stocks or funds to buy."
         right={<Button size="sm" kind="ghost" onClick={() => setShowNo(!showNo)}>{showNo ? "Hide" : "What we didn't suggest"}</Button>}>
-        {rec.education_only ? <Info>{rec.message}</Info> : <div className="grid md:grid-cols-3 gap-3">{rec.cards.map((c: any) => <RecCard key={c.category} c={c} onLearn={openLesson} />)}</div>}
+        {rec.education_only ? <Info>{rec.message}</Info> : <SuggestionCards cards={rec.cards} />}
         {showNo && <ul className="mt-4 text-sm space-y-1.5 bg-gray-50 rounded-md p-4">{rec.not_suggested.map((n: any) => <li key={n.category}><b>{n.label}:</b> <span className="text-ink-soft">{n.reason}</span></li>)}</ul>}
       </Card>
 

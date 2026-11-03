@@ -15,8 +15,8 @@ from .common import config, path
 PERMISSIONS = {
     "profile": {"label": "Profile information", "purpose": "Build your four-number profile and check suitability.",
                 "stops": "Quiz, profile and suitability analysis stop. Learning content stays available."},
-    "portfolio": {"label": "Portfolio and transaction data (existing users)",
-                  "purpose": "Analyse your holdings, compute your behavioural profile, place you in a cluster.",
+    "portfolio": {"label": "Linked Kite and Coin data",
+                  "purpose": "Analyse the holdings, positions and SIPs you allowed Zerodha to share, compute your behavioural profile, place you in a peer group.",
                   "stops": "Portfolio analysis, clustering and peer comparisons stop; your holdings are dropped from this session."},
     "tracking": {"label": "Activity in other apps and websites (background tracking)",
                  "purpose": "Would let the app use what you do in other apps and websites, for example for ads. You choose: 'Ask app not to track' (default) or 'Allow'. Even if allowed, this prototype collects nothing and the model never uses it.",
@@ -31,14 +31,31 @@ NOTICE = {
                         "Holdings, SIPs and transaction summaries from Kite, Coin and smallcase (existing users)"],
     "purposes": ["Profile and cluster placement", "Suitability checks and guardrails", "Portfolio analysis and learning content"],
     "ai_use": "Numbers, scores and suggestions come from deterministic, versioned rules. An optional AI summary only rephrases those results and may not add products, prices or returns.",
-    "recipients": "No third parties in this prototype. In production: the proposed advisory entity only.",
-    "retention": "This prototype keeps data in memory for the session only. Consent events are kept in a local audit log.",
+    "recipients": "No one. Nothing is sent back to Zerodha, and no third party receives your data.",
+    "promise": "We never suggest F&O or margin trading (MTF), and nothing above Low risk when your goal is under one year away.",
+    "retention": "While your account is open, then deleted, except records SEBI requires an adviser to keep (risk profile, suggestions shown, consents) for 5 years. This prototype keeps data in memory for the session only.",
     "withdraw": "Turn any permission off on the 'Consent and data' page. Withdrawing is as easy as giving consent.",
     "not_used": "Gender, payment method and app-browsing / clickstream are never used for clustering, suitability or ranking.",
     "tracking": ("Background tracking is a separate, optional choice, never bundled with the service (DPDP Act 2023, s.6: consent must be free, "
                  "specific, informed, unconditional and unambiguous, with a clear affirmative action, and as easy to withdraw as to give; s.6(4)). "
                  "Saying no never limits the app. The choice mirrors the phone-level 'Ask App Not to Track' prompt."),
     "commencement": "DPDP Rules 2025: Rule 4 commences 13 Nov 2026; Rules 3 and 5–16 on 13 May 2027 (per BRD §13.3).",
+}
+
+# The adviser behind Tulana (placeholders where a real registration would go)
+RIA = {
+    "name": "Tulana Advisory Pvt Ltd",
+    "status": "SEBI Registered Investment Adviser",
+    "reg_no": "INA000XXXXXX",
+    "principal_officer": "[Principal Officer name]",
+    "grievance_officer": "[Grievance officer name, email]",
+    "dpo": "[Data protection contact email]",
+    "terms_version": "T-2026-11-v1",
+    "disclaimer": ("Registration granted by SEBI and certification from NISM in no way guarantee performance of the "
+                   "intermediary or provide any assurance of returns to investors. Investments in securities market "
+                   "are subject to market risks. Read all the related documents carefully before investing."),
+    "funding": ("Tulana is free. Its running costs are met under an arm's-length agreement with the Zerodha group, "
+                "approved by both boards. Tulana earns nothing from your trades, SIPs or the platform you choose."),
 }
 
 _lock = threading.Lock()
@@ -62,6 +79,16 @@ def mask(sid: str) -> str:
     return sid[:2] + "••••" + sid[-2:]
 
 
+def consent_id(sid: str, perm: str) -> str:
+    """Stable ID for this session's consent to one permission under the current notice (works across server copies)."""
+    v = config()["versions"]["notice_version"]
+    return "TC-" + hashlib.sha256(f"{sid}|{perm}|{v}".encode()).hexdigest()[:8]
+
+
+def consent_ids(sid: str) -> dict:
+    return {k: consent_id(sid, k) for k, on in get(sid)["consents"].items() if on}
+
+
 def set_consent(sid: str, perm: str, granted: bool) -> dict:
     s = get(sid)
     s["consents"][perm] = granted
@@ -71,7 +98,8 @@ def set_consent(sid: str, perm: str, granted: bool) -> dict:
         if perm == "profile":
             s["data"].pop("new", None)
     log(sid, "consent_granted" if granted else "consent_withdrawn",
-        {"permission": perm, "purpose": PERMISSIONS[perm]["purpose"], "notice_version": config()["versions"]["notice_version"]})
+        {"permission": perm, "consent_id": consent_id(sid, perm), "purpose": PERMISSIONS[perm]["purpose"],
+         "notice_version": config()["versions"]["notice_version"]})
     return s["consents"]
 
 

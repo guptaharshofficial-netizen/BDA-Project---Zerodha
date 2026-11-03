@@ -207,7 +207,8 @@ def analyse_new(quiz: dict, suitability: dict | None = None, basket: list | None
     ms = None
     if money:
         ms = money_summary(money)
-        quiz = {**quiz, "monthly_surplus": surplus_band(ms["left_each_month"])}
+        if not money.get("undisclosed"):  # 'Prefer not to say': keep the quiz's middle band (5k-25k) for capacity
+            quiz = {**quiz, "monthly_surplus": surplus_band(ms["left_each_month"])}
         suitability.setdefault("emi_inr", ms["emi"])
         if ms["emergency_months"] is not None:
             suitability.setdefault("emergency_months", ms["emergency_months"])
@@ -271,6 +272,7 @@ def analyse_new(quiz: dict, suitability: dict | None = None, basket: list | None
         "persona": persona_info(cl), "grids": grid_positions(bands),
         "willingness": willingness, "capacity_suitability": capacity, "capacity_notes": cap_notes,
         "consistency_flag": mismatch, "horizon_years": horizon, "suitability": suitability,
+        "capacity_default": bool(money and money.get("undisclosed")),
         "basket": items, "analysis": an, "risk": rs,
         "risk_gaps": risk.gaps(rs["band"], willingness, capacity) if rs else None,
         "concentration": portfolio.concentration_level(an) if items else None,

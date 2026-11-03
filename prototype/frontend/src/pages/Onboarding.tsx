@@ -15,11 +15,12 @@ const Q = [
 const HORIZON = [["<1 yr", "Within a year"], ["1-3 years", "1 to 3 years"], ["3-5 years", "3 to 5 years"], ["5+ years", "More than 5 years"]] as const;
 
 export default function Onboarding({ preset }: { preset: any }) {
-  const { finishOnboarding, busy } = useApp();
+  const { finishOnboarding, busy, signup } = useApp();
+  const [pnts, setPnts] = useState(false);
   const [step, setStep] = useState(0);
   const p = preset;
   const [m, setM] = useState<Record<string, N>>(p ? { monthly_income: 60000, monthly_spending: 35000, emi: 0, bank_savings: 50000, invest_lumpsum: 100000, invest_monthly: 10000, age: p.age }
-    : { monthly_income: "", monthly_spending: "", emi: "", bank_savings: "", invest_lumpsum: "", invest_monthly: "", age: "" });
+    : { monthly_income: "", monthly_spending: "", emi: "", bank_savings: "", invest_lumpsum: "", invest_monthly: "", age: signup?.age ?? "" });
   const [out, setOut] = useState<Record<string, N>>({});
   const [goal, setGoal] = useState(p ? "Grow long-term wealth" : "");
   const [horizon, setHorizon] = useState<string>(p ? "5+ years" : "");
@@ -28,10 +29,12 @@ export default function Onboarding({ preset }: { preset: any }) {
   const left = Math.max(0, num(m.monthly_income) - num(m.monthly_spending) - num(m.emi));
   const emMonths = num(m.monthly_spending) ? num(m.bank_savings) / num(m.monthly_spending) : null;
 
-  const ok = [num(m.monthly_income) > 0 && m.monthly_spending !== "", true, horizon !== "" && (num(m.invest_lumpsum) > 0 || num(m.invest_monthly) > 0), Q.every((q) => ans[q.k])][step];
+  const ok = [pnts || (num(m.monthly_income) > 0 && m.monthly_spending !== ""), true, horizon !== "" && (num(m.invest_lumpsum) > 0 || num(m.invest_monthly) > 0), Q.every((q) => ans[q.k])][step];
 
   const submit = async () => {
-    const money = { ...Object.fromEntries(Object.entries(m).map(([k, v]) => [k, num(v)])), outside: Object.fromEntries(Object.entries(out).map(([k, v]) => [k, num(v)])) };
+    const base = Object.fromEntries(Object.entries(m).map(([k, v]) => [k, num(v)]));
+    if (pnts) { base.monthly_income = 0; base.monthly_spending = 0; base.emi = 0; }
+    const money = { ...base, ...(pnts ? { undisclosed: 1 } : {}), outside: Object.fromEntries(Object.entries(out).map(([k, v]) => [k, num(v)])) };
     await finishOnboarding({
       money, goal, horizon,
       quiz: { ...ans, horizon, monthly_surplus: "5k-25k" },
@@ -48,22 +51,28 @@ export default function Onboarding({ preset }: { preset: any }) {
       <Card className="mt-5">
         {step === 0 && (
           <div className="grid sm:grid-cols-2 gap-4">
+            <label className="sm:col-span-2 flex items-start gap-3 text-sm bg-gray-50 border border-line rounded-md px-3 py-2.5 cursor-pointer">
+              <input type="checkbox" className="mt-0.5 w-4 h-4" checked={pnts} onChange={(e) => setPnts(e.target.checked)} />
+              <span><b>Prefer not to say</b> my income, spending and EMIs<span className="block text-xs text-ink-faint">We'll use the middle capacity band (conservative) and say so on your risk profile. You can add them later.</span></span>
+            </label>
+            {!pnts && <>
             <MoneyInput id="inc" label="Monthly income (after tax)" value={m.monthly_income} onChange={(v) => setM({ ...m, monthly_income: v })} />
             <MoneyInput id="spend" label="Monthly spending" value={m.monthly_spending} onChange={(v) => setM({ ...m, monthly_spending: v })} hint="Rent, bills, food, travel…" />
             <MoneyInput id="emi" label="Loan EMIs per month" value={m.emi} onChange={(v) => setM({ ...m, emi: v })} hint="Leave empty if none" />
+            </>}
             <MoneyInput id="sav" label="Savings in your bank account" value={m.bank_savings} onChange={(v) => setM({ ...m, bank_savings: v })} />
             <label className="block"><span className="text-sm font-medium">Your age</span>
               <input inputMode="numeric" className="mt-1.5 w-full border border-line rounded-md px-3.5 py-2.5 outline-none focus:border-brand" value={m.age} onChange={(e) => setM({ ...m, age: e.target.value === "" ? "" : Number(e.target.value.replace(/\D/g, "")) })} />
               <span className="text-xs text-ink-faint mt-1 block">Used only to check timelines, never to group you.</span></label>
-            <div className="sm:col-span-2 bg-brand-soft rounded-lg p-4 flex flex-wrap gap-6">
+            {!pnts && <div className="sm:col-span-2 bg-brand-soft rounded-lg p-4 flex flex-wrap gap-6">
               <div><div className="text-xs text-brand-ink">Left over each month</div><div className="text-2xl font-semibold num">{inrShort(left)}</div></div>
               {emMonths !== null && <div><div className="text-xs text-brand-ink">Emergency cushion</div><div className="text-2xl font-semibold num">{emMonths.toFixed(1)} months</div><div className="text-xs text-brand-ink">of spending in the bank</div></div>}
-            </div>
+            </div>}
           </div>
         )}
         {step === 1 && (
           <div>
-            <p className="text-sm text-ink-soft mb-4">Money you've invested outside this app. Rough amounts are fine; this helps us avoid suggesting what you already have.</p>
+            <p className="text-sm text-ink-soft mb-4">Money you've invested outside this app. Rough amounts are fine; this helps us avoid suggesting what you already have. All optional: leave it blank if you'd rather not say.</p>
             <div className="grid sm:grid-cols-2 gap-4">
               {OUTSIDE.map(([k, l]) => <MoneyInput key={k} id={`o-${k}`} label={l} value={out[k] ?? ""} onChange={(v) => setOut({ ...out, [k]: v })} />)}
             </div>

@@ -14,7 +14,7 @@ from . import calculator, consent_audit as ca, learn, news, portfolio, service, 
 from .common import PROTO, SECTORS, catalogue, config, load_yaml, read_json, versions
 from .profile import QUIZ_OPTIONS
 
-app = FastAPI(title="YourBroker AI Portfolio Prototype (academic)")
+app = FastAPI(title="Tulana Portfolio Navigator (academic prototype)")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
                    allow_methods=["*"], allow_headers=["*"])
 
@@ -34,7 +34,7 @@ def meta() -> dict:
             "notice": ca.NOTICE, "test_users": users, "quiz_options": QUIZ_OPTIONS, "catalogue": catalogue(),
             "sectors": SECTORS, "data_quality": dq, "thresholds": config()["recommender"] | config()["guardrails"],
             "llm_available": bool(__import__("os").environ.get("ANTHROPIC_API_KEY")),
-            "app_links": config().get("app_links") or {}, "indices": _ticker()}
+            "app_links": config().get("app_links") or {}, "indices": _ticker(), "ria": ca.RIA}
 
 
 def _ticker() -> list[dict]:
@@ -66,12 +66,42 @@ class ConsentIn(BaseModel):
 def consent(c: ConsentIn) -> dict:
     if c.permission not in ca.PERMISSIONS:
         raise HTTPException(400, "unknown permission")
-    return {"consents": ca.set_consent(c.session, c.permission, c.granted), "token": ca.token(c.session)}
+    return {"consents": ca.set_consent(c.session, c.permission, c.granted), "consent_ids": ca.consent_ids(c.session),
+            "token": ca.token(c.session)}
 
 
 @app.get("/api/consent/{sid}")
 def consent_state(sid: str) -> dict:
-    return {"consents": ca.get(sid)["consents"], "log": ca.read_log(sid)}
+    return {"consents": ca.get(sid)["consents"], "consent_ids": ca.consent_ids(sid), "log": ca.read_log(sid)}
+
+
+# User actions that must be on the record (DPDP / SEBI IA record keeping). Free text is never stored.
+EVENTS = {"kite_link_allowed", "kite_link_declined", "kite_link_disconnected", "signup_completed", "service_choice",
+          "profile_accepted", "terms_accepted", "suggestion_dismissed", "suggestion_feedback", "suggestions_off",
+          "suggestions_on", "handoff", "grievance_raised", "data_request", "account_closed"}
+SAFE_KEYS = {"category", "value", "app", "target", "kind", "request", "about", "version", "profile_version", "band"}
+
+
+class EventIn(BaseModel):
+    session: str
+    event: str
+    detail: dict[str, Any] | None = None
+
+
+@app.post("/api/event")
+def event(e: EventIn) -> dict:
+    if e.event not in EVENTS:
+        raise HTTPException(400, "unknown event")
+    d = {k: str(v)[:60] for k, v in (e.detail or {}).items() if k in SAFE_KEYS}
+    ref = None
+    if e.event == "grievance_raised":
+        ref = "TUL-" + __import__("hashlib").sha256(f"{e.session}{len(ca.read_log(e.session))}".encode()).hexdigest()[:6].upper()
+        d["ticket"] = ref
+    if e.event == "account_closed":
+        for p in ("profile", "portfolio", "analytics", "tracking"):
+            ca.set_consent(e.session, p, False)
+    ca.log(e.session, e.event, {**d, "consent_ids": ca.consent_ids(e.session)})
+    return {"ok": True, "ref": ref, "consents": ca.get(e.session)["consents"], "token": ca.token(e.session)}
 
 
 class ExistingIn(BaseModel):
@@ -89,7 +119,9 @@ def existing(x: ExistingIn) -> dict:
     _need(x.session, "portfolio")
     a = service.analyse_existing(x.user_id, x.surface, x.goals, x.suitability, x.declared)
     ca.log(x.session, "analysis_existing", {"user": f"YB••••{x.user_id[-2:]}", "surface": x.surface,
-                                            "cards": [c["category"] for c in a["recommendations"]["cards"]]})
+                                            "cards": [c["category"] for c in a["recommendations"]["cards"]],
+                                            "consent_ids": ca.consent_ids(x.session)})
+    a["consent_ids"] = ca.consent_ids(x.session)
     return a
 
 
@@ -106,11 +138,15 @@ class NewIn(BaseModel):
 @app.post("/api/new")
 def new_user(x: NewIn) -> dict:
     _need(x.session, "profile")
+    if x.simulate_history:  # the switch to an activity-based profile adds a new data source: needs the Kite link consent
+        _need(x.session, "portfolio")
     try:
         a = service.analyse_new(x.quiz, x.suitability, x.basket, x.budget, x.simulate_history, x.money)
     except ValueError as e:
         raise HTTPException(400, str(e))
-    ca.log(x.session, "analysis_new", {"profile": a["profile"], "cards": [c["category"] for c in a["recommendations"]["cards"]]})
+    ca.log(x.session, "analysis_new", {"profile": a["profile"], "cards": [c["category"] for c in a["recommendations"]["cards"]],
+                                       "consent_ids": ca.consent_ids(x.session)})
+    a["consent_ids"] = ca.consent_ids(x.session)
     return a
 
 

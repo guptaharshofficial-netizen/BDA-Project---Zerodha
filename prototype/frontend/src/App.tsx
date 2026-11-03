@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { api, Json } from "./api";
-import { Button, ErrorNote, Loading, Modal, setAppLinks, Toggle } from "./ui";
+import { Button, ErrorNote, Handoff, Info, Loading, Modal, setAppLinks, setHandoff } from "./ui";
 import { Icon } from "./components/Icons";
 import Welcome from "./pages/Welcome";
 import Onboarding from "./pages/Onboarding";
@@ -11,15 +11,27 @@ import PeersPage from "./pages/PeersPage";
 import CalcPage from "./pages/CalcPage";
 import ExplorePage from "./pages/ExplorePage";
 import Learn from "./pages/Learn";
-import ConsentPage from "./pages/Consent";
+import Settings, { SettingsSection } from "./pages/Settings";
 import Operated from "./pages/Operated";
 import Reviewer from "./pages/Reviewer";
 import Summary from "./pages/Summary";
+import {
+  ComplianceFooter, ConsentBody, HandoffModal, JourneyConsent, KiteApproval, KiteEntry, KiteSignup, PartnerModal, RiaStrip,
+  RiskResult, ServiceChoice, Signup, TermsGate,
+} from "./components/Compliance";
 
-export type Mode = "welcome" | "onboarding" | "new" | "existing" | "explore";
-export type Tab = "plan" | "overview" | "spread" | "explore" | "peers" | "calc" | "learn" | "privacy" | "how" | "reviewer";
+export type Mode = "welcome" | "journey" | "onboarding" | "new" | "existing" | "explore";
+export type Tab = "plan" | "overview" | "spread" | "explore" | "peers" | "calc" | "learn" | "settings" | "how" | "reviewer";
+export type JourneyPath = "existing" | "new";
+export type JourneyStep = "kite_entry" | "kite_signup" | "kite_approval" | "signup" | "service" | "consent";
+export interface Journey { path: JourneyPath; step: JourneyStep; who: string; relink?: { mode: Mode; tab: Tab } }
+const JPATH: Record<JourneyPath, JourneyStep[]> = {
+  existing: ["kite_entry", "kite_approval", "signup", "service", "consent"],
+  new: ["kite_signup", "signup", "service", "consent"],
+};
 
 export interface BasketItem { kind: "stock" | "fund"; id: string; name: string; amount: number; sector?: string; sip?: number; symbol?: string }
+export interface HistoryRow { ts: string; label: string; category: string; rule: string; profile: number; consent?: string; versions: string; action: string }
 
 interface AppCtx {
   meta: Json; sid: string; consents: Record<string, boolean>; mode: Mode; userId: string | null;
@@ -29,6 +41,18 @@ interface AppCtx {
   grant: (perm: string, on: boolean) => Promise<void>; startAs: (who: "new" | "explore" | string) => void;
   reloadExisting: (extra?: Json) => void; openSummary: (a: Json) => void; busy: boolean;
   wi: BasketItem[]; setWi: (b: BasketItem[]) => void;
+  // separate-adviser flow
+  journey: Journey | null; setJourney: (j: Journey) => void; journeyNext: () => void; exitJourney: () => void;
+  startJourneyAt: (path: JourneyPath, step: JourneyStep, who?: string) => void; setModeTo: (m: Mode) => void;
+  kiteLinked: boolean; setKiteLinked: (v: boolean) => void; disconnectKite: () => void;
+  signup: { name: string; age: number } | null; setSignup: (s: { name: string; age: number }) => void;
+  accepted: { profile: boolean; terms: boolean }; accept: (k: "profile" | "terms", d?: Json) => void; profileVersion: number;
+  sugOff: boolean; setSugOff: (v: boolean) => void; dismissed: string[]; dismiss: (c: string) => void; undismiss: (c: string) => void;
+  feedback: Record<string, string>; giveFeedback: (c: string, v: string) => void; history: HistoryRow[];
+  lastUpdated: Date | null; consentIds: Record<string, string>; logEvent: (e: string, d?: Json) => Promise<Json>;
+  openHandoff: (h: Handoff) => void; markLeaving: (category?: string) => void; openPartner: (c: string) => void;
+  settingsSection: SettingsSection | null; openSettings: (s: SettingsSection) => void; tickets: { ref: string; about: string }[];
+  closeAccount: () => void;
 }
 const Ctx = createContext<AppCtx>(null as unknown as AppCtx);
 export const useApp = () => useContext(Ctx);
@@ -39,11 +63,14 @@ const TABS: Record<string, TabDef[]> = {
   existing: [{ id: "overview", label: "Overview", short: "Overview", icon: "home" }, { id: "spread", label: "Spread my risk", short: "Spread", icon: "layers" }, { id: "calc", label: "Returns calculator", short: "Calculator", icon: "calc" }, { id: "peers", label: "Investors like you", short: "Peers", icon: "users" }, { id: "learn", label: "Learn", short: "Learn", icon: "book" }],
   explore: [{ id: "explore", label: "Explore", short: "Explore", icon: "compass" }, { id: "calc", label: "Returns calculator", short: "Calculator", icon: "calc" }, { id: "learn", label: "Learn", short: "Learn", icon: "book" }],
 };
+const PERSONAL_TABS: Tab[] = ["overview", "plan", "spread", "peers"];
+const stamp = () => new Date().toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 export default function App() {
   const [meta, setMeta] = useState<Json>(null);
   const [sid, setSid] = useState("");
   const [consents, setConsents] = useState<Record<string, boolean>>({ profile: false, portfolio: false, tracking: false, analytics: false });
+  const [consentIds, setConsentIds] = useState<Record<string, string>>({});
   const [wi, setWi] = useState<BasketItem[]>([]);
   const [att, setAtt] = useState(false);
   const [mode, setMode] = useState<Mode>("welcome");
@@ -55,23 +82,60 @@ export default function App() {
   const [basket, setBasketState] = useState<BasketItem[]>([]);
   const [lesson, setLesson] = useState<string | null>(null);
   const [err, setErr] = useState("");
+  const [flash, setFlash] = useState("");
   const [busy, setBusy] = useState(false);
   const [extra, setExtra] = useState<Json>({});
   const [summaryFor, setSummaryFor] = useState<Json | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [menu, setMenu] = useState(false);
   const [banner, setBanner] = useState(true);
+  // separate-adviser flow state
+  const [journey, setJourney] = useState<Journey | null>(null);
+  const [kiteLinked, setKiteLinked] = useState(false);
+  const [signup, setSignup] = useState<{ name: string; age: number } | null>(null);
+  const [accepted, setAccepted] = useState({ profile: false, terms: false });
+  const [profileVersion, setProfileVersion] = useState(0);
+  const [sugOff, setSugOffState] = useState(false);
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const [feedback, setFeedback] = useState<Record<string, string>>({});
+  const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [handoff, setHandoffState] = useState<Handoff | null>(null);
+  const [partner, setPartner] = useState<string | null>(null);
+  const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
+  const [tickets, setTickets] = useState<{ ref: string; about: string }[]>([]);
   const reqId = useRef(0);
+  const leaving = useRef(false);
+  const seen = useRef(new WeakSet<object>());
+  const live = useRef<{ mode: Mode; profile: Json | null; basket: BasketItem[] }>({ mode, profile, basket });
+  live.current = { mode, profile, basket };
 
   useEffect(() => {
     Promise.all([api.meta(), api.session()]).then(([m, s]) => { setAppLinks(m.app_links); setMeta(m); setSid(s.session); setAtt(true); }).catch((e) => setErr(String(e)));
+    setHandoff((h) => setHandoffState(h));
   }, []);
+
+  const logEvent = useCallback(async (event: string, detail?: Json) => {
+    try {
+      const r = await api.event(sid, event, detail);
+      if (r?.consents) setConsents(r.consents);
+      if (event === "grievance_raised" && r?.ref) setTickets((t) => [...t, { ref: r.ref, about: String(detail?.about ?? "") }]);
+      return r;
+    } catch { return null; }
+  }, [sid]);
+
+  const noteAction = (category: string, action: string) => setHistory((h) => {
+    const i = h.map((r) => r.category).lastIndexOf(category);
+    if (i < 0) return h;
+    const n = [...h]; n[i] = { ...n[i], action }; return n;
+  });
 
   const grant = useCallback(async (perm: string, on: boolean) => {
     let r;
     try { r = await api.consent(sid, perm, on); }
     catch (e) { setErr(`Couldn't save that choice (${(e as Error).message}). If you just updated the app, close the server window and run make_dev.bat again.`); return; }
-    setConsents(r.consents);
+    setConsents(r.consents); setConsentIds(r.consent_ids || {});
     if (!on && (perm === "portfolio" || perm === "profile")) {
       setAnalysis(null); setNewA(null);
       if (perm === "profile") { setProfile(null); setBasketState([]); }
@@ -85,7 +149,7 @@ export default function App() {
     try {
       const r = await api.newUser({ session: sid, quiz: p.quiz, suitability: p.suitability, money: p.money, budget: p.money?.invest_lumpsum || null,
         basket: b.map((x) => ({ kind: x.kind, id: x.id, amount: x.amount, sip: x.sip || 0 })) });
-      if (my === reqId.current) setNewA(r);
+      if (my === reqId.current) { setNewA(r); setLastUpdated(new Date()); }
     } catch (e) { setErr(String((e as Error).message)); }
     finally { if (my === reqId.current) setBusy(false); }
   }, [sid]);
@@ -97,19 +161,81 @@ export default function App() {
     if (mode !== "existing" || !userId || !consents.portfolio || !consents.profile) return;
     setBusy(true); setErr("");
     api.existing({ session: sid, user_id: userId, surface: "All", ...extra })
-      .then(setAnalysis).catch((e) => setErr(String((e as Error).message))).finally(() => setBusy(false));
-  }, [mode, userId, extra, consents.portfolio, consents.profile, sid]);
+      .then((r) => { setAnalysis(r); setLastUpdated(new Date()); if (r.consent_ids) setConsentIds(r.consent_ids); })
+      .catch((e) => setErr(String((e as Error).message))).finally(() => setBusy(false));
+  }, [mode, userId, extra, consents.portfolio, consents.profile, sid, refreshKey]);
 
+  // Automatic update: whenever the user comes back to Tulana from Kite or Coin (no manual refresh button)
+  useEffect(() => {
+    const back = () => {
+      if (document.visibilityState !== "visible" || !leaving.current) return;
+      leaving.current = false;
+      const s = live.current;
+      if (s.mode === "existing") setRefreshKey((k) => k + 1);
+      else if (s.mode === "new" && s.profile) runNew(s.profile, s.basket);
+      setFlash("Welcome back. Your portfolio was updated automatically.");
+      setTimeout(() => setFlash(""), 4000);
+    };
+    document.addEventListener("visibilitychange", back); window.addEventListener("focus", back);
+    return () => { document.removeEventListener("visibilitychange", back); window.removeEventListener("focus", back); };
+  }, [runNew]);
+
+  // Suggestion history: every card shown after the risk profile and terms were accepted
+  useEffect(() => {
+    if (!accepted.profile || !accepted.terms) return;
+    const a = mode === "existing" ? analysis : mode === "new" ? newA : null;
+    if (!a || seen.current.has(a)) return;
+    seen.current.add(a);
+    const cid = mode === "existing" ? (a.consent_ids?.portfolio ?? consentIds.portfolio) : (a.consent_ids?.profile ?? consentIds.profile);
+    const rows: HistoryRow[] = (a.recommendations?.cards || []).map((c: Json) => ({
+      ts: stamp(), label: c.label, category: c.category, rule: c.why?.rule_fired ?? "", profile: profileVersion, consent: cid,
+      versions: `${a.model_version} · ${a.rules_version}`, action: dismissed.includes(c.category) ? "Dismissed" : "Shown" }));
+    if (rows.length) setHistory((h) => [...h, ...rows]);
+  }, [analysis, newA, accepted, mode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const resetPerson = () => {
+    setAnalysis(null); setNewA(null); setExtra({}); setBasketState([]); setWi([]); setMenu(false);
+    setAccepted({ profile: false, terms: false }); setDismissed([]); setFeedback({}); setSugOffState(false);
+  };
   const needs = (who: string) => (who === "explore" ? [] : who === "new" || who === "U04" ? ["profile"] : ["profile", "portfolio"]);
   const go = (who: string) => {
-    setAnalysis(null); setNewA(null); setExtra({}); setBasketState([]); setWi([]); setMenu(false);
+    resetPerson(); setJourney(null);
     if (who === "explore") { setUserId(null); setMode("explore"); setTab("explore"); return; }
     if (who === "new") { setUserId(null); setProfile(null); setMode("onboarding"); return; }
     if (who === "U04") { setUserId("U04"); setProfile(null); setMode("onboarding"); return; }
     setUserId(who); setMode("existing"); setTab("overview");
   };
   const startAs = (who: string) => {
-    if (needs(who).every((p) => consents[p])) go(who); else setPending(who);
+    if (needs(who).every((p) => consents[p])) { if (needs(who).includes("portfolio")) setKiteLinked(true); go(who); } else setPending(who);
+  };
+
+  const startJourneyAt = (path: JourneyPath, step: JourneyStep, who?: string) => {
+    setMenu(false);
+    const relink = step === "kite_approval" && mode !== "welcome" && mode !== "journey" ? { mode, tab } : undefined;
+    const existing = meta?.test_users?.filter((u: Json) => u.track === "existing") ?? [];
+    setJourney({ path, step, who: who ?? (path === "new" ? "new" : existing[1]?.id ?? existing[0]?.id), relink });
+    setMode("journey"); window.scrollTo({ top: 0 });
+  };
+  const exitJourney = () => { setJourney(null); setMode("welcome"); };
+  const journeyNext = () => {
+    if (!journey) return;
+    if (journey.relink) { const r = journey.relink; setJourney(null); setMode(r.mode); setTab(r.tab); setFlash("Kite linked. Turn on C2 in Settings to use the linked data."); setTimeout(() => setFlash(""), 4000); return; }
+    const steps = JPATH[journey.path];
+    const i = steps.indexOf(journey.step);
+    if (i < steps.length - 1) { setJourney({ ...journey, step: steps[i + 1] }); window.scrollTo({ top: 0 }); return; }
+    go(journey.path === "new" ? "new" : journey.who);
+  };
+  const disconnectKite = () => { setKiteLinked(false); logEvent("kite_link_disconnected", { target: "Tulana" }); grant("portfolio", false); setTab("settings"); };
+  const accept = (k: "profile" | "terms", d?: Json) => {
+    if (k === "profile") { const v = profileVersion + 1; setProfileVersion(v); logEvent("profile_accepted", { profile_version: `P-v${v}`, ...(d || {}) }); }
+    else logEvent("terms_accepted", d);
+    setAccepted((a) => ({ ...a, [k]: true })); window.scrollTo({ top: 0 });
+  };
+  const closeAccount = async () => {
+    await logEvent("account_closed");
+    setConsents({ profile: false, portfolio: false, tracking: false, analytics: false }); setConsentIds({});
+    resetPerson(); setUserId(null); setProfile(null); setKiteLinked(false); setSignup(null); setHistory([]); setTickets([]);
+    setMode("welcome"); setFlash("Your Tulana account was closed: consents withdrawn and the Kite link revoked. Your Zerodha account is unaffected.");
   };
 
   if (err && !meta) return <div className="p-8"><ErrorNote msg={`The app's engine isn't responding (${err}). Is make_dev.bat still running?`} /></div>;
@@ -117,19 +243,52 @@ export default function App() {
 
   const ctx: AppCtx = {
     meta, sid, consents, mode, userId, analysis, newA, profile, basket, setBasket, finishOnboarding, tab, setTab,
-    openLesson: (id) => { setLesson(id); setTab("learn"); }, lesson, grant, startAs,
+    openLesson: (id) => { setLesson(id); setTab("learn"); if (mode === "welcome" || mode === "journey") setMode("explore"); window.scrollTo({ top: 0 }); }, lesson, grant, startAs,
     reloadExisting: (ex) => setExtra({ ...extra, ...(ex || {}) }), openSummary: (a) => setSummaryFor(a), busy, wi, setWi,
+    journey, setJourney, journeyNext, exitJourney, startJourneyAt, setModeTo: setMode,
+    kiteLinked, setKiteLinked, disconnectKite, signup, setSignup, accepted, accept, profileVersion,
+    sugOff, setSugOff: (v) => { setSugOffState(v); logEvent(v ? "suggestions_off" : "suggestions_on"); },
+    dismissed, dismiss: (c) => { setDismissed((d) => [...d, c]); noteAction(c, "Dismissed"); logEvent("suggestion_dismissed", { category: c }); },
+    undismiss: (c) => { setDismissed((d) => d.filter((x) => x !== c)); noteAction(c, "Shown"); },
+    feedback, giveFeedback: (c, v) => { setFeedback((f) => ({ ...f, [c]: v })); noteAction(c, v === "y" ? "Marked helpful" : "Marked not helpful"); logEvent("suggestion_feedback", { category: c, value: v === "y" ? "helpful" : "not_helpful" }); },
+    history, lastUpdated, consentIds, logEvent,
+    openHandoff: (h) => setHandoffState(h), markLeaving: (c) => { leaving.current = true; if (c) noteAction(c, "Went to Kite / Coin"); },
+    openPartner: setPartner, settingsSection, openSettings: (s) => { setSettingsSection(s); setTab("settings"); setMenu(false); if (mode === "welcome" || mode === "journey") setMode("explore"); window.scrollTo({ top: 0 }); },
+    tickets, closeAccount,
   };
   const user = userId ? meta.test_users.find((x: Json) => x.id === userId) : null;
   const tabs = TABS[mode] ?? [];
-  const summaryTarget = mode === "existing" ? analysis : mode === "new" ? newA : null;
+  const summaryTarget = (mode === "existing" ? analysis : mode === "new" ? newA : null);
+  const personal = (mode === "existing" && analysis) || (mode === "new" && newA);
+  const gated = personal && PERSONAL_TABS.includes(tab) && (!accepted.profile || !accepted.terms);
+
+  const page = () => {
+    if (mode === "welcome") return <Welcome />;
+    if (mode === "journey" && journey) {
+      return { kite_entry: <KiteEntry />, kite_signup: <KiteSignup />, kite_approval: <KiteApproval />, signup: <Signup />, service: <ServiceChoice />, consent: <JourneyConsent /> }[journey.step];
+    }
+    if (mode === "onboarding") return <Onboarding preset={userId === "U04" ? meta.test_users.find((u: Json) => u.id === "U04") : null} />;
+    if (tab === "settings") return <Settings />;
+    if (tab === "how") return <Operated />;
+    if (tab === "reviewer") return <Reviewer />;
+    if (tab === "learn") return <Learn />;
+    if (tab === "calc") return <CalcPage />;
+    if (tab === "explore") return <ExplorePage />;
+    if (mode === "existing" && !analysis) return <Loading what="Reading your linked portfolio" />;
+    if (gated) return !accepted.profile ? <RiskResult /> : <TermsGate />;
+    if (tab === "plan") return <NewPlan />;
+    if (tab === "overview") return <Overview />;
+    if (tab === "spread") return <Spread />;
+    if (tab === "peers") return <PeersPage />;
+    return <Overview />;
+  };
 
   return (
     <Ctx.Provider value={ctx}>
       <div className={`min-h-screen flex flex-col ${tabs.length ? "has-bottom-nav" : ""}`}>
         <header className="bg-white border-b border-line sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
-            <button onClick={() => { setMode("welcome"); setMenu(false); }} className="flex items-center gap-2 font-semibold text-[17px] tracking-tight shrink-0" aria-label="Tulana home">
+            <button onClick={() => { setMode("welcome"); setJourney(null); setMenu(false); }} className="flex items-center gap-2 font-semibold text-[17px] tracking-tight shrink-0" aria-label="Tulana home">
               <img src="/logo-icon.png" alt="" className="h-8 w-auto" />
               <span className="text-[#14295c] text-[22px] font-bold lowercase tracking-tight leading-none">tulana</span>
             </button>
@@ -141,7 +300,7 @@ export default function App() {
               ))}
             </nav>
             <div className={`${tabs.length ? "md:ml-2" : ""} ml-auto flex items-center gap-2`}>
-              {summaryTarget && <span className="whitespace-nowrap"><Button size="sm" kind="dark" onClick={() => setSummaryFor(summaryTarget)}>✦ <span className="hidden sm:inline">AI </span>summary</Button></span>}
+              {summaryTarget && !gated && <span className="whitespace-nowrap"><Button size="sm" kind="dark" onClick={() => setSummaryFor(summaryTarget)}>✦ <span className="hidden sm:inline">AI </span>summary</Button></span>}
               <div className="relative">
                 <button aria-label="Menu" aria-expanded={menu} onClick={() => setMenu(!menu)}
                   className="h-9 w-9 sm:w-auto sm:pl-1 sm:pr-3 rounded-full border border-line flex items-center justify-center gap-2 text-sm hover:bg-gray-50">
@@ -150,7 +309,10 @@ export default function App() {
                 </button>
                 {menu && (
                   <div className="absolute right-0 mt-2 w-72 bg-white border border-line rounded-lg shadow-pop p-2 text-sm z-40">
-                    <div className="px-3 py-2 text-xs font-semibold text-ink-faint uppercase">Try the demo as</div>
+                    <div className="px-3 py-2 text-xs font-semibold text-ink-faint uppercase">Full journey</div>
+                    <button className="w-full text-left px-3 py-2 rounded hover:bg-gray-50" onClick={() => startJourneyAt("existing", "kite_entry")}>Existing investor, from Kite</button>
+                    <button className="w-full text-left px-3 py-2 rounded hover:bg-gray-50" onClick={() => startJourneyAt("new", "kite_signup")}>New investor, from Zerodha sign-up</button>
+                    <div className="px-3 py-2 text-xs font-semibold text-ink-faint uppercase">Demo shortcuts</div>
                     <button className="w-full text-left px-3 py-2 rounded hover:bg-gray-50" onClick={() => startAs("new")}>A brand-new investor (fill in yourself)</button>
                     {meta.test_users.map((u: Json) => (
                       <button key={u.id} className="w-full text-left px-3 py-2 rounded hover:bg-gray-50" onClick={() => startAs(u.id)}>
@@ -158,26 +320,28 @@ export default function App() {
                       </button>
                     ))}
                     <div className="border-t border-line my-2" />
-                    {[["privacy", "Privacy & data"], ["how", "How this would work legally"], ["reviewer", "For reviewers: model & tests"]].map(([id, l]) => (
-                      <button key={id} className="w-full text-left px-3 py-2 rounded hover:bg-gray-50" onClick={() => { setTab(id as Tab); setMenu(false); if (mode === "welcome") setMode("explore"); }}>{l}</button>
+                    <button className="w-full text-left px-3 py-2 rounded hover:bg-gray-50" onClick={() => ctx.openSettings("permissions")}>Settings (permissions, data, help)</button>
+                    {[["how", "How this would work legally"], ["reviewer", "For reviewers: model & tests"]].map(([id, l]) => (
+                      <button key={id} className="w-full text-left px-3 py-2 rounded hover:bg-gray-50" onClick={() => { setTab(id as Tab); setMenu(false); if (mode === "welcome" || mode === "journey") setMode("explore"); }}>{l}</button>
                     ))}
                   </div>
                 )}
               </div>
             </div>
           </div>
-          {(meta.indices ?? []).length > 0 && mode !== "welcome" && (
+          {(meta.indices ?? []).length > 0 && mode !== "welcome" && mode !== "journey" && (
             <div className="2xl:hidden border-t border-line px-4 py-1.5 flex gap-5 overflow-x-auto no-scrollbar text-[11.5px]" aria-label="Indices, last close and 1-month change">
               {meta.indices.slice(0, 3).map((x: Json) => (
                 <span key={x.name} className="whitespace-nowrap"><span className="text-ink-soft">{x.name}</span> <span className={`num ${x.chg_30d >= 0 ? "text-up" : "text-down"}`}>{x.ltp.toLocaleString("en-IN", { maximumFractionDigits: 1 })}</span> <span className="num text-ink-faint">{x.chg_30d >= 0 ? "+" : ""}{x.chg_30d.toFixed(2)}% 1M</span></span>))}
             </div>
           )}
+          <RiaStrip />
         </header>
 
-        {banner && mode !== "welcome" && (
+        {banner && mode !== "welcome" && mode !== "journey" && (
           <div className="bg-amber-50 border-b border-amber-100 text-amber-950 text-[12.5px]">
             <div className="max-w-6xl mx-auto px-4 py-1.5 flex gap-3 items-start">
-              <p className="flex-1">We show information and options to explore. We don't tell you what to buy, and nothing is bought for you. <button className="underline" onClick={() => setTab("how")}>Why?</button></p>
+              <p className="flex-1">Free suggestions from a SEBI-registered adviser, based on your accepted risk profile. Nothing is bought for you: you decide, on any platform. <button className="underline" onClick={() => setTab("how")}>Why?</button></p>
               <button aria-label="Dismiss" onClick={() => setBanner(false)}>✕</button>
             </div>
           </div>
@@ -185,23 +349,21 @@ export default function App() {
 
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-5 sm:py-7" onClick={() => menu && setMenu(false)}>
           {err && <div className="mb-4"><ErrorNote msg={err} /></div>}
-          {mode === "welcome" ? <Welcome /> :
-            mode === "onboarding" ? <Onboarding preset={userId === "U04" ? meta.test_users.find((u: Json) => u.id === "U04") : null} /> :
-            tab === "privacy" ? <ConsentPage /> : tab === "how" ? <Operated /> : tab === "reviewer" ? <Reviewer /> :
-            tab === "learn" ? <Learn /> : tab === "calc" ? <CalcPage /> : tab === "explore" ? <ExplorePage /> :
-            mode === "existing" && !analysis ? <Loading what="Reading your portfolio" /> :
-            tab === "plan" ? <NewPlan /> : tab === "overview" ? <Overview /> : tab === "spread" ? <Spread /> :
-            tab === "peers" ? <PeersPage /> : <Overview />}
+          {flash && <div className="mb-4" role="status"><Info tone="good">{flash}</Info></div>}
+          {page()}
         </main>
 
         <footer className="border-t border-line bg-white">
-          <div className="max-w-6xl mx-auto px-4 py-4 text-xs text-ink-faint flex flex-wrap gap-x-4 gap-y-1 justify-between">
-            <span>Academic prototype · not investment advice · stocks and funds: {meta.data_quality.equity_mode} data as of 30 Oct 2026 · "investors like you" figures are simulated</span>
-            <span>{meta.model_version} · {meta.rules_version}</span>
+          <div className="max-w-6xl mx-auto px-4 py-4 text-xs text-ink-faint space-y-2">
+            <ComplianceFooter />
+            <div className="flex flex-wrap gap-x-4 gap-y-1 justify-between border-t border-line pt-2">
+              <span>Academic prototype · stocks and funds: {meta.data_quality.equity_mode} data as of 30 Oct 2026 · "investors like you" figures are simulated · registration details are placeholders</span>
+              <span>{meta.model_version} · {meta.rules_version}</span>
+            </div>
           </div>
         </footer>
 
-        {tabs.length > 0 && mode !== "onboarding" && mode !== "welcome" && (
+        {tabs.length > 0 && mode !== "onboarding" && mode !== "welcome" && mode !== "journey" && (
           <nav aria-label="Sections" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-line" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
             <div className="grid" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0,1fr))` }}>
               {tabs.map((t) => (
@@ -215,11 +377,18 @@ export default function App() {
         )}
 
         {att && <TrackingPrompt onDone={() => setAtt(false)} />}
-        {pending && <ConsentSheet who={pending} onCancel={() => setPending(null)} onDone={() => { const w = pending; setPending(null); go(w); }} onSkip={() => { setPending(null); go("explore"); }} />}
+        {pending && <ConsentSheet who={pending} onCancel={() => setPending(null)} onDone={() => { const w = pending; setPending(null); if (needs(w).includes("portfolio")) setKiteLinked(true); go(w); }} onSkip={() => { setPending(null); go("explore"); }} />}
         {summaryFor && <Summary analysis={summaryFor} onClose={() => setSummaryFor(null)} />}
+        {handoff && <HandoffModal h={handoff} onClose={() => setHandoffState(null)} />}
+        {partner && <PartnerModal cat={partner} onClose={() => setPartner(null)} />}
       </div>
     </Ctx.Provider>
   );
+}
+
+function ConsentSheet({ who, onCancel, onDone, onSkip }: { who: string; onCancel: () => void; onDone: () => void; onSkip: () => void }) {
+  const existing = who !== "new" && who !== "U04";
+  return <Modal title="Before we start" onClose={onCancel}><ConsentBody existing={existing} onDone={onDone} onSkip={onSkip} demo /></Modal>;
 }
 
 /** Index strip like Kite's header (last close and 1-month change; the files carry no intraday data). */
@@ -276,39 +445,3 @@ export function TrackingChoice() {
   );
 }
 
-function ConsentSheet({ who, onCancel, onDone, onSkip }: { who: string; onCancel: () => void; onDone: () => void; onSkip: () => void }) {
-  const { meta, consents, grant } = useApp();
-  const existing = who !== "new" && who !== "U04";
-  const need = existing ? ["profile", "portfolio"] : ["profile"];
-  const n = meta.notice;
-  const plain: Record<string, [string, string]> = {
-    profile: ["Your answers", "Income, spending, goals and risk answers, used to tailor what you see."],
-    portfolio: ["Your holdings", "Stocks, funds and SIPs on Kite, Coin and smallcase, used to analyse your portfolio."],
-    analytics: ["App usage (optional)", "Helps improve the app. Off by default and never used for your analysis."],
-  };
-  return (
-    <Modal title="Before we start" onClose={onCancel}>
-      <p className="text-sm text-ink-soft">Choose what you're happy to share. You can change this anytime in <b>Privacy & data</b>, and saying no won't affect your trading account.</p>
-      <div className="mt-5 space-y-4">
-        {(["profile", "portfolio", "analytics"] as const).filter((k) => existing || k !== "portfolio").map((k) => (
-          <div key={k} className="flex gap-4 items-start justify-between border border-line rounded-lg p-4">
-            <div><div className="font-medium text-sm">{plain[k][0]}</div><div className="text-xs text-ink-faint mt-0.5">{plain[k][1]}</div></div>
-            <Toggle id={`cs-${k}`} label="" on={!!consents[k]} onChange={(v) => grant(k, v)} />
-          </div>
-        ))}
-        <TrackingChoice />
-      </div>
-      <details className="mt-4 text-xs text-ink-faint">
-        <summary className="cursor-pointer">Full notice</summary>
-        <ul className="mt-2 space-y-1 list-disc pl-4">
-          <li>Data: {n.data_categories.join("; ")}.</li><li>Use of AI: {n.ai_use}</li><li>Shared with: {n.recipients}</li>
-          <li>Kept for: {n.retention}</li><li>{n.not_used}</li><li>{n.tracking}</li><li>{n.commencement}</li>
-        </ul>
-      </details>
-      <div className="mt-6 flex flex-col sm:flex-row gap-2">
-        <Button full size="lg" disabled={!need.every((p) => consents[p])} onClick={onDone}>Continue</Button>
-        <Button full size="lg" kind="secondary" onClick={onSkip}>Explore without sharing</Button>
-      </div>
-    </Modal>
-  );
-}

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { BasketItem, useApp } from "../App";
 import { inrShort } from "../api";
-import { Button, Card, fitLevel, Info, Modal, RecCard, RiskMeter, RISK_WORDS, SPREAD_WORDS } from "../ui";
+import { Button, Card, fitLevel, Info, Modal, RiskMeter, RISK_WORDS, SPREAD_WORDS } from "../ui";
+import { StartHere, SuggestionCards } from "../components/Compliance";
 import { icon, PeersCard, SectorGrid, SectorMix, TopList } from "../components/Market";
 
 export default function NewPlan() {
-  const { newA: a, profile, basket, setBasket, openLesson, setTab, meta, busy } = useApp();
+  const { newA: a, profile, basket, setBasket, setTab, meta, busy, lastUpdated } = useApp();
   const [sector, setSector] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<BasketItem | null>(null);
   const [last, setLast] = useState<string>("");
@@ -36,15 +37,18 @@ export default function NewPlan() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm text-ink-faint">Your plan{profile.goal ? ` · ${profile.goal}` : ""}</p>
+          <p className="text-sm text-ink-faint">Your plan{profile.goal ? ` · ${profile.goal}` : ""} · built from your answers{lastUpdated ? ` · updated ${lastUpdated.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}` : ""}</p>
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Let's build your portfolio, one step at a time</h1>
         </div>
       </div>
 
+      <StartHere a={a} basket={basket} />
+
       <div className="grid md:grid-cols-3 gap-3">
         <Card>
           <div className="text-xs font-medium text-ink-faint uppercase tracking-wide">Your money</div>
-          <div className="text-2xl font-semibold num mt-1">{inrShort(ms?.left_each_month)} <span className="text-sm font-normal text-ink-faint">left / month</span></div>
+          {a.capacity_default ? <div className="text-2xl font-semibold mt-1">Not shared <span className="text-sm font-normal text-ink-faint">(middle capacity band used)</span></div>
+            : <div className="text-2xl font-semibold num mt-1">{inrShort(ms?.left_each_month)} <span className="text-sm font-normal text-ink-faint">left / month</span></div>}
           <div className="text-sm text-ink-soft mt-2 space-y-0.5">
             <div>Investing now: <b className="num">{inrShort(ms?.invest_lumpsum)}</b>{ms?.invest_monthly ? <> + <b className="num">{inrShort(ms.invest_monthly)}</b>/month</> : null}</div>
             {ms?.emergency_months != null && <div>Emergency cushion: <b>{ms.emergency_months.toFixed(1)} months</b> of spending{ms.emergency_months < 3 && <span className="text-amber-700"> (3–6 is a common target)</span>}</div>}
@@ -68,7 +72,7 @@ export default function NewPlan() {
 
       <Card title="A good place to start" subtitle="Simple options that suit people starting out. We never suggest individual stocks to new investors; you can still pick your own below.">
         {a.recommendations.education_only ? <Info>{a.recommendations.message}</Info> :
-          <div className="grid md:grid-cols-3 gap-3">{a.recommendations.cards.map((c: any) => <RecCard key={c.category} c={c} onLearn={openLesson} />)}</div>}
+          <SuggestionCards cards={a.recommendations.cards} />}
       </Card>
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">

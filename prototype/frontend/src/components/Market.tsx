@@ -90,6 +90,8 @@ export function TopList({ sector, onClose, onAdd, addLabel = "Add", warn, initia
           ? <select aria-label="Sort" className="border border-line rounded px-3 py-1.5 text-[13px] bg-white" value={sort} onChange={(e) => setSort(e.target.value)}><option value="return">Best 1-year return</option><option value="alpha">A–Z</option></select>
           : <select aria-label="Fund type" className="border border-line rounded px-3 py-1.5 text-[13px] bg-white" value={grp} onChange={(e) => setGrp(e.target.value)}>{groups.map((g) => <option key={g.key} value={g.key}>{g.label}</option>)}</select>}
       </div>
+      <p className="mt-3 flex flex-wrap items-center gap-2"><span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-800">Past performance screen, not a recommendation</span>
+        <span className="text-xs text-ink-faint">{kind === "fund" ? "Direct plans only (no commission). " : ""}Sorted by past return only; no row is highlighted.</span></p>
       {kind === "fund" && sector && <p className="text-xs text-ink-faint mt-2">Funds aren't sorted by sector: each one spreads money across many sectors. Pick a type of fund instead.</p>}
       {warn && kind === "stock" && <div className="mt-3"><Info tone="warn">{warn}</Info></div>}
       {!rows ? <Loading what={kind === "fund" ? "Fetching fund returns (first time can take a few seconds)" : "Loading"} /> : (

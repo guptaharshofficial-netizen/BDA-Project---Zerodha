@@ -42,6 +42,7 @@ export default function PeersPage() {
             </div>
           )}
         </div>
+        <p className="px-5 sm:px-6 pt-3 text-xs text-ink-soft">Figures come only from investors who agreed to this use, and a group figure is shown only when at least 50 people are in it, so no one can be singled out.</p>
         <p className="px-5 sm:px-6 py-3 text-xs text-ink-faint">Grouped by how people invest (how often they trade, how much is automatic, how much risk they hold, how much they put in), never by age, gender or where they live. In this demo the group is simulated.</p>
       </section>
 

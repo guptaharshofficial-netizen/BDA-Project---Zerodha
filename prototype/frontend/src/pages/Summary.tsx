@@ -17,7 +17,8 @@ export default function Summary({ analysis, onClose }: { analysis: any; onClose:
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 id="sum-title" className="text-lg font-semibold">Summary of your analysis</h2>
-            <p className="text-xs text-ink-faint">AI-assisted summary of the analysis above · mode: {s?.mode ?? "…"}</p>
+            <p className="text-xs text-ink-faint">AI-generated wording of rule-based results · mode: {s?.mode ?? "…"}</p>
+            <p className="text-xs text-ink-faint">Tulana's adviser is responsible for this content. The summary cannot add or change suggestions.</p>
           </div>
           <button aria-label="Close summary" className="text-ink-faint hover:text-ink px-1" onClick={onClose}>✕</button>
         </div>

@@ -36,6 +36,7 @@ export const api = {
   news: (kind: string, name: string, symbol?: string) => req(`/api/news?kind=${kind}&name=${encodeURIComponent(name)}${symbol ? `&symbol=${encodeURIComponent(symbol)}` : ""}`),
   summary: (b: Json) => req("/api/summary", b),
   learn: () => req("/api/learn"),
+  event: (session: string, event: string, detail?: Json) => req("/api/event", { session, event, detail }),
   evaluation: () => req("/api/evaluation"),
   testcases: () => req("/api/testcases"),
 };

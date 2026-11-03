@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useApp } from "../App";
 import { api } from "../api";
 import { Card, Loading } from "../ui";
+import { Guide, GUIDES } from "../components/Compliance";
 
 export default function Learn() {
   const { lesson } = useApp();
@@ -10,23 +11,30 @@ export default function Learn() {
   useEffect(() => { api.learn().then(setLs); }, []);
   useEffect(() => { if (lesson) setActive(lesson); }, [lesson]);
   if (!ls) return <Loading />;
-  const cur = ls.find((l) => l.id === active) ?? ls[0];
+  const guide = GUIDES.find((g) => g.id === active);
+  const cur = ls.find((l) => l.id === active) ?? (guide ? null : ls[0]);
   return (
     <div className="grid md:grid-cols-[240px_1fr] gap-5">
       <nav aria-label="Lessons" className="bg-white border border-line rounded-md p-2 h-fit">
+        <div className="px-3 pt-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Getting started</div>
+        {GUIDES.map((g) => (
+          <button key={g.id} onClick={() => setActive(g.id)} aria-current={active === g.id ? "true" : undefined}
+            className={`w-full text-left text-sm px-3 py-2 rounded-lg ${active === g.id ? "bg-accent-soft text-accent-dark font-medium" : "hover:bg-gray-50"}`}>{g.title}</button>
+        ))}
+        <div className="px-3 pt-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-faint border-t border-line mt-2">Lessons</div>
         {ls.map((l) => (
-          <button key={l.id} onClick={() => setActive(l.id)} aria-current={cur.id === l.id ? "true" : undefined}
-            className={`w-full text-left text-sm px-3 py-2 rounded-lg ${cur.id === l.id ? "bg-accent-soft text-accent-dark font-medium" : "hover:bg-gray-50"}`}>{l.title}</button>
+          <button key={l.id} onClick={() => setActive(l.id)} aria-current={cur?.id === l.id ? "true" : undefined}
+            className={`w-full text-left text-sm px-3 py-2 rounded-lg ${cur?.id === l.id ? "bg-accent-soft text-accent-dark font-medium" : "hover:bg-gray-50"}`}>{l.title}</button>
         ))}
       </nav>
-      <div className="space-y-4">
+      {guide ? <div className="space-y-4"><Guide id={guide.id} /></div> : cur && <div className="space-y-4">
         <Card title={cur.title}>
           <p className="text-[15px] leading-relaxed">{cur.body}</p>
           <div className="mt-4 bg-gray-50 border border-line rounded-lg p-3 text-sm"><b>Worked example.</b> {cur.example}</div>
         </Card>
         <Check key={cur.id} quiz={cur.quiz} />
         <p className="text-xs text-ink-faint">Free and open to everyone; no sign-up needed. Comprehension checks stay on this device and never change your profile or suitability.</p>
-      </div>
+      </div>}
     </div>
   );
 }

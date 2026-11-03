@@ -15,3 +15,5 @@ input[type=range] { accent-color: #387ed1; }
 .no-scrollbar { scrollbar-width: none; }
 /* leave room for the phone-style bottom tab bar */
 @media (max-width: 767px) { .has-bottom-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom)); } }
+
+.inp { @apply w-full border border-line rounded-md px-3.5 py-2.5 outline-none bg-white text-sm; }

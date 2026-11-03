@@ -92,13 +92,20 @@ export function InertAction({ label }: { label: string }) {
 
 let LINKS: Record<string, { app: string; url: string }> = {};
 export const setAppLinks = (l: Record<string, { app: string; url: string }>) => { LINKS = l || {}; };
+export const appLink = (kind: "stock" | "fund") => LINKS[kind] ?? { app: kind === "stock" ? "Kite" : "Coin", url: kind === "stock" ? "https://kite.zerodha.com/" : "https://coin.zerodha.com/funds" };
+
+/** Every jump to Kite or Coin goes through the hand-off screen (group-company disclosure, any-platform option). */
+export type Handoff = { kind: "stock" | "fund"; copy?: string; category?: string };
+let HANDOFF: ((h: Handoff) => void) | null = null;
+export const setHandoff = (f: (h: Handoff) => void) => { HANDOFF = f; };
 
 /** "Go to Kite" (stocks) / "Go to Coin" (funds). Opens the app in a new tab and copies the name to paste into its search.
  *  Nothing is bought from here. */
-export function GoToApp({ kind, copy, compact }: { kind: "stock" | "fund"; copy?: string; compact?: boolean }) {
-  const l = LINKS[kind] ?? { app: kind === "stock" ? "Kite" : "Coin", url: kind === "stock" ? "https://kite.zerodha.com/" : "https://coin.zerodha.com/funds" };
+export function GoToApp({ kind, copy, compact, category }: { kind: "stock" | "fund"; copy?: string; compact?: boolean; category?: string }) {
+  const l = appLink(kind);
   const [done, setDone] = useState(false);
   const go = async () => {
+    if (HANDOFF) { HANDOFF({ kind, copy, category }); return; }
     if (copy) { try { await navigator.clipboard.writeText(copy); } catch { /* clipboard may be blocked */ } }
     window.open(l.url, "_blank", "noopener,noreferrer");
     setDone(true); setTimeout(() => setDone(false), 2500);
@@ -155,7 +162,7 @@ export function NewsList({ kind, name, symbol, notes }: { kind: "sector" | "stoc
   );
 }
 
-export function WhyDrawer({ why, learn, onLearn }: { why: any; learn?: string; onLearn?: (id: string) => void }) {
+export function WhyDrawer({ why, learn, onLearn, extra }: { why: any; learn?: string; onLearn?: (id: string) => void; extra?: [string, ReactNode][] }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-3">
@@ -170,6 +177,7 @@ export function WhyDrawer({ why, learn, onLearn }: { why: any; learn?: string; o
           <Row k="What could change it">{why.what_could_change}</Row>
           <Row k="What we don't know">{why.unknowns}</Row>
           <Row k="Method">{why.evidence} {why.assumptions}</Row>
+          {(extra || []).map(([k, v]) => <Row key={k} k={k}>{v}</Row>)}
           {learn && onLearn && <div><button className="text-brand-dark text-[13px] font-medium hover:underline" onClick={() => onLearn(learn)}>Learn about this →</button></div>}
         </dl>
       )}
@@ -187,17 +195,19 @@ export function TierBadge({ tier }: { tier: string }) {
   return <Badge tone={tone as any}>{TIER_WORD[tier] ?? tier}</Badge>;
 }
 
-export function RecCard({ c, onLearn }: { c: any; onLearn?: (id: string) => void }) {
+export function RecCard({ c, onLearn, action, whyExtra, footer, top }: { c: any; onLearn?: (id: string) => void; action?: ReactNode; whyExtra?: [string, ReactNode][]; footer?: ReactNode; top?: ReactNode }) {
   return (
     <article className="border border-line rounded-lg p-4 bg-white flex flex-col hover:border-ink-faint/50 transition-colors">
       <div className="flex flex-wrap items-center gap-2 mb-2">
         <TierBadge tier={c.tier} />
         <span className="text-xs text-ink-faint">on {c.surface}</span>
+        {top && <span className="ml-auto">{top}</span>}
       </div>
       <h3 className="font-semibold text-ink">{c.label}</h3>
       <p className="text-sm text-ink-soft mt-1 flex-1">{c.headline}</p>
-      <div className="mt-3">{c.surface === "Kite" || c.surface === "Coin" ? <GoToApp kind={c.surface === "Kite" ? "stock" : "fund"} /> : <InertAction label={c.action_label} />}</div>
-      <WhyDrawer why={c.why} learn={c.learn} onLearn={onLearn} />
+      <div className="mt-3">{action ?? (c.surface === "Kite" || c.surface === "Coin" ? <GoToApp kind={c.surface === "Kite" ? "stock" : "fund"} category={c.category} /> : <InertAction label={c.action_label} />)}</div>
+      <WhyDrawer why={c.why} learn={c.learn} onLearn={onLearn} extra={whyExtra} />
+      {footer}
     </article>
   );
 }
