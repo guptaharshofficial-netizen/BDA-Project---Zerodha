@@ -3,10 +3,16 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import linear_sum_assignment
-from sklearn.cluster import KMeans
-from sklearn.metrics import adjusted_rand_score, davies_bouldin_score, silhouette_score
-from sklearn.preprocessing import StandardScaler
+
+# scikit-learn and SciPy are needed only to TRAIN the model (make_data / build.py). The running app only places a user
+# in a cluster with plain numpy (assign below), so these are imported lazily. This keeps the server start fast and lets it
+# run on machines where a security policy blocks SciPy's compiled files (e.g. Windows Smart App Control).
+def _ml():
+    from scipy.optimize import linear_sum_assignment
+    from sklearn.cluster import KMeans
+    from sklearn.metrics import adjusted_rand_score, davies_bouldin_score, silhouette_score
+    from sklearn.preprocessing import StandardScaler
+    return linear_sum_assignment, KMeans, adjusted_rand_score, davies_bouldin_score, silhouette_score, StandardScaler
 
 from .common import catalogue, config, versions, write_json
 from .profile import DIMS, band, make_grid, pct_from_grid, raw_dimension_scores
@@ -49,6 +55,7 @@ def dimension_table(pop: pd.DataFrame) -> tuple[pd.DataFrame, dict, dict]:
 
 
 def select_k(X: np.ndarray, cfg: dict) -> tuple[int, list[dict]]:
+    _, KMeans, _, davies_bouldin_score, silhouette_score, _ = _ml()
     lo, hi = cfg["clustering"]["k_range"]
     table = []
     for k in range(lo, hi + 1):
@@ -78,6 +85,7 @@ def select_k(X: np.ndarray, cfg: dict) -> tuple[int, list[dict]]:
 
 
 def name_clusters(centroids_band: np.ndarray, tol: float) -> list[dict]:
+    linear_sum_assignment = _ml()[0]
     pv = persona_vectors()
     names = list(pv.keys())
     cost = np.zeros((len(centroids_band), len(names)))
@@ -140,6 +148,7 @@ def precision_at_3(pop: pd.DataFrame, labels: np.ndarray, adoption: dict, seed: 
 
 
 def fit(pop: pd.DataFrame) -> dict:
+    _, KMeans, adjusted_rand_score, _, _, StandardScaler = _ml()
     cfg = config()
     cont, fgrids, cgrids = dimension_table(pop)
     Xb = to_band_units(cont[DIMS].values)
