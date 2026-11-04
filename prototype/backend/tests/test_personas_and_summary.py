@@ -27,3 +27,18 @@ def test_summary_sections_and_validator():
     assert summary.validate("Consider US stocks.", f)[0] is False
     assert summary.validate("You should buy this.", f)[0] is False
     assert summary.validate(s["sections"]["Where you stand"], f)[0] is True
+
+
+def test_presentation_profiles_land_in_their_segments_and_stay_out_of_training():
+    """The five presentation profiles cover all four segments; the two added ones are excluded from training."""
+    from yourbroker import service, synthetic
+    m = service.model()
+    seg = {u: service.analyse_existing(u)["persona"]["name"] for u in ("U01", "U02", "U05", "U07")}
+    assert seg == {"U01": "Systematic Saver", "U02": "Active Trader", "U05": "Dormant / Just-in-time", "U07": "Income Preserver"}
+    ob = service.test_user("U06")["onboarding"]
+    quiz = {**{k: v for k, v in ob["answers"].items()}, "horizon": ob["horizon"], "monthly_surplus": "5k-25k"}
+    new = service.analyse_new(quiz, {"age": 31}, money={**ob["money"], "outside": ob["outside"]})
+    assert new["persona"]["name"] == "Systematic Saver"
+    assert new["capacity_suitability"] == 2  # the home-loan EMI pulls capacity down one band
+    assert set(synthetic.test_users_frame()["user_id"]) == {"U01", "U02", "U03", "U05"}
+    assert m["n_users"] == 3004

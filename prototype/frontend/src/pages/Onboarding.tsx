@@ -19,12 +19,13 @@ export default function Onboarding({ preset }: { preset: any }) {
   const [pnts, setPnts] = useState(false);
   const [step, setStep] = useState(0);
   const p = preset;
-  const [m, setM] = useState<Record<string, N>>(p ? { monthly_income: 60000, monthly_spending: 35000, emi: 0, bank_savings: 50000, invest_lumpsum: 100000, invest_monthly: 10000, age: p.age }
+  const ob = p?.onboarding; // presentation profiles carry their own answers; Rohan keeps the original defaults
+  const [m, setM] = useState<Record<string, N>>(p ? { monthly_income: 60000, monthly_spending: 35000, emi: 0, bank_savings: 50000, invest_lumpsum: 100000, invest_monthly: 10000, ...(ob?.money || {}), age: p.age }
     : { monthly_income: "", monthly_spending: "", emi: "", bank_savings: "", invest_lumpsum: "", invest_monthly: "", age: signup?.age ?? "" });
-  const [out, setOut] = useState<Record<string, N>>({});
-  const [goal, setGoal] = useState(p ? "Grow long-term wealth" : "");
-  const [horizon, setHorizon] = useState<string>(p ? "5+ years" : "");
-  const [ans, setAns] = useState<Record<string, string>>(p ? { market_fall_20pct: "Buy more", check_frequency: "Daily", invest_style: "Pick it myself" } : {});
+  const [out, setOut] = useState<Record<string, N>>(ob?.outside || {});
+  const [goal, setGoal] = useState(p ? ob?.goal ?? "Grow long-term wealth" : "");
+  const [horizon, setHorizon] = useState<string>(p ? ob?.horizon ?? "5+ years" : "");
+  const [ans, setAns] = useState<Record<string, string>>(p ? ob?.answers ?? { market_fall_20pct: "Buy more", check_frequency: "Daily", invest_style: "Pick it myself" } : {});
   const num = (v: N) => (v === "" ? 0 : v);
   const left = Math.max(0, num(m.monthly_income) - num(m.monthly_spending) - num(m.emi));
   const emMonths = num(m.monthly_spending) ? num(m.bank_savings) / num(m.monthly_spending) : null;
@@ -46,7 +47,7 @@ export default function Onboarding({ preset }: { preset: any }) {
     <div className="max-w-2xl mx-auto">
       <Steps step={step} labels={STEPS} />
       <h1 className="text-xl sm:text-2xl font-semibold tracking-tight mt-6">{STEPS[step]}</h1>
-      {p && step === 0 && <p className="text-sm text-ink-faint mt-1">Pre-filled for Rohan (demo). Change anything you like.</p>}
+      {p && <p className="text-sm text-ink-faint mt-1">Pre-filled for {p.name.split(" ")[0]} (demo profile). Change anything you like.</p>}
 
       <Card className="mt-5">
         {step === 0 && (

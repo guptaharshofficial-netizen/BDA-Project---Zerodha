@@ -74,7 +74,7 @@ def test_users_frame() -> pd.DataFrame:
     from .portfolio import demo_categories
     out = []
     for u in load_yaml("test_users.yaml")["users"]:
-        if u["track"] != "existing":
+        if u["track"] != "existing" or u.get("in_training") is False:
             continue
         out.append({"user_id": u["id"], "source_persona": "test user", "messy": False,
                     "trades_per_month": u["trades_per_month"], "days_since_last_txn": u["days_since_last_txn"],

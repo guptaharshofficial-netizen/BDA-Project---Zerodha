@@ -76,3 +76,45 @@ users:
     monthly_inflow_inr: 0
     holdings: [4 stocks, thematic EV smallcase, flexi-cap fund (SIP stopped 2023)]
     expected_profile: {activity: 1, automation: 1, risk: 3, capacity: 3}
+  # Presentation personas (added Nov 2026). Not part of the training population (in_training: false),
+  # so adding them does not change the trained model.
+  - id: U06
+    name: Aditya Kulkarni
+    age: 31
+    city: Mumbai
+    occupation: Chartered accountant at a mid-size firm; newly married, bought a flat in Thane
+    track: new
+    in_training: false
+    quiz:
+      check_frequency: monthly
+      invest_style: set-and-forget (sip)
+      market_fall_20pct: hold
+      horizon: 5+ years
+      monthly_surplus: 25k-1l
+      already_holds: fd
+    onboarding:
+      money: {monthly_income: 110000, monthly_spending: 45000, emi: 38000, bank_savings: 240000, invest_lumpsum: 50000, invest_monthly: 10000}
+      outside: {fd: 400000, stocks: 60000}
+      goal: "Long-term wealth for a growing family"
+      horizon: 5+ years
+      answers: {market_fall_20pct: Hold, check_frequency: Monthly, invest_style: "Set-and-forget (SIP)"}
+    signup: {mobile: "98••••••47", email: "aditya.k@example.com", pan: "AKLPK••••Q"}
+    expected_profile: {activity: 2, automation: 4, risk: 4, capacity: 3}
+  - id: U07
+    name: Vandana Rao
+    age: 55
+    city: Visakhapatnam
+    occupation: Senior bank officer, retires in about 5 years
+    track: existing
+    in_training: false
+    platforms: [Coin, Kite]
+    trades_per_month: 0.2
+    days_since_last_txn: 75
+    sip_share_of_inflows: 0.7
+    high_risk_share: 0.21
+    aum_inr: 2400000
+    monthly_inflow_inr: 20000
+    holdings: [short-duration debt fund, balanced-advantage fund (SIP), liquid fund, 2 large-cap stocks bought years ago]
+    signup: {mobile: "94••••••18", email: "vandana.rao@example.com", pan: "BVRPR••••K"}
+    expected_profile: {activity: 1, automation: 3, risk: 1, capacity: 3}
+

@@ -197,12 +197,13 @@ export default function App() {
     setAnalysis(null); setNewA(null); setExtra({}); setBasketState([]); setWi([]); setMenu(false);
     setAccepted({ profile: false, terms: false }); setDismissed([]); setFeedback({}); setSugOffState(false);
   };
-  const needs = (who: string) => (who === "explore" ? [] : who === "new" || who === "U04" ? ["profile"] : ["profile", "portfolio"]);
+  const isNewWho = (who: string) => who === "new" || !!meta?.test_users?.some((u: Json) => u.id === who && u.track === "new");
+  const needs = (who: string) => (who === "explore" ? [] : isNewWho(who) ? ["profile"] : ["profile", "portfolio"]);
   const go = (who: string) => {
     resetPerson(); setJourney(null);
     if (who === "explore") { setUserId(null); setMode("explore"); setTab("explore"); return; }
     if (who === "new") { setUserId(null); setProfile(null); setMode("onboarding"); return; }
-    if (who === "U04") { setUserId("U04"); setProfile(null); setMode("onboarding"); return; }
+    if (isNewWho(who)) { setUserId(who); setProfile(null); setMode("onboarding"); return; } // pre-filled demo new investor
     setUserId(who); setMode("existing"); setTab("overview");
   };
   const startAs = (who: string) => {
@@ -223,7 +224,7 @@ export default function App() {
     const steps = JPATH[journey.path];
     const i = steps.indexOf(journey.step);
     if (i < steps.length - 1) { setJourney({ ...journey, step: steps[i + 1] }); window.scrollTo({ top: 0 }); return; }
-    go(journey.path === "new" ? "new" : journey.who);
+    go(journey.path === "new" ? (journey.who && journey.who !== "new" ? journey.who : "new") : journey.who);
   };
   const disconnectKite = () => { setKiteLinked(false); logEvent("kite_link_disconnected", { target: "Tulana" }); grant("portfolio", false); setTab("settings"); };
   const accept = (k: "profile" | "terms", d?: Json) => {
@@ -267,7 +268,7 @@ export default function App() {
     if (mode === "journey" && journey) {
       return { kite_entry: <KiteEntry />, kite_signup: <KiteSignup />, kite_approval: <KiteApproval />, signup: <Signup />, service: <ServiceChoice />, consent: <JourneyConsent /> }[journey.step];
     }
-    if (mode === "onboarding") return <Onboarding preset={userId === "U04" ? meta.test_users.find((u: Json) => u.id === "U04") : null} />;
+    if (mode === "onboarding") return <Onboarding key={userId ?? "new"} preset={userId && isNewWho(userId) ? meta.test_users.find((u: Json) => u.id === userId) : null} />;
     if (tab === "settings") return <Settings />;
     if (tab === "how") return <Operated />;
     if (tab === "reviewer") return <Reviewer />;
@@ -377,7 +378,7 @@ export default function App() {
         )}
 
         {att && <TrackingPrompt onDone={() => setAtt(false)} />}
-        {pending && <ConsentSheet who={pending} onCancel={() => setPending(null)} onDone={() => { const w = pending; setPending(null); if (needs(w).includes("portfolio")) setKiteLinked(true); go(w); }} onSkip={() => { setPending(null); go("explore"); }} />}
+        {pending && <ConsentSheet existing={!isNewWho(pending)} onCancel={() => setPending(null)} onDone={() => { const w = pending; setPending(null); if (needs(w).includes("portfolio")) setKiteLinked(true); go(w); }} onSkip={() => { setPending(null); go("explore"); }} />}
         {summaryFor && <Summary analysis={summaryFor} onClose={() => setSummaryFor(null)} />}
         {handoff && <HandoffModal h={handoff} onClose={() => setHandoffState(null)} />}
         {partner && <PartnerModal cat={partner} onClose={() => setPartner(null)} />}
@@ -386,8 +387,7 @@ export default function App() {
   );
 }
 
-function ConsentSheet({ who, onCancel, onDone, onSkip }: { who: string; onCancel: () => void; onDone: () => void; onSkip: () => void }) {
-  const existing = who !== "new" && who !== "U04";
+function ConsentSheet({ existing, onCancel, onDone, onSkip }: { existing: boolean; onCancel: () => void; onDone: () => void; onSkip: () => void }) {
   return <Modal title="Before we start" onClose={onCancel}><ConsentBody existing={existing} onDone={onDone} onSkip={onSkip} demo /></Modal>;
 }
 

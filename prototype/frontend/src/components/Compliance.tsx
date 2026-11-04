@@ -158,11 +158,11 @@ export function Signup() {
         <div className="space-y-4">
           <Field label="Full name (as on PAN)"><input className="inp" value={name} onChange={(e) => setName(e.target.value)} /></Field>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Mobile"><input className="inp" defaultValue="98••••••21" /></Field>
-            <Field label="Email"><input className="inp" defaultValue="you@example.com" /></Field>
+            <Field label="Mobile"><input className="inp" defaultValue={u?.signup?.mobile ?? "98••••••21"} /></Field>
+            <Field label="Email"><input className="inp" defaultValue={u?.signup?.email ?? "you@example.com"} /></Field>
           </div>
           <Field label="PAN" hint="KYC is checked through a KYC registration agency (mocked in this prototype).">
-            <div className="flex gap-2"><input className="inp" defaultValue="ABCDE••••F" /><Button kind="secondary" onClick={() => setKyc(true)}>{kyc ? "✓ KYC verified" : "Verify KYC"}</Button></div>
+            <div className="flex gap-2"><input className="inp" defaultValue={u?.signup?.pan ?? "ABCDE••••F"} /><Button kind="secondary" onClick={() => setKyc(true)}>{kyc ? "✓ KYC verified" : "Verify KYC"}</Button></div>
           </Field>
           <Field label="Date of birth"><input type="date" className="inp" value={dob} onChange={(e) => setDob(e.target.value)} /></Field>
           {age !== null && age < 18 && <Info tone="warn">Tulana is only for people aged 18 or over, so we can't open an account. Your Zerodha account is not affected.</Info>}

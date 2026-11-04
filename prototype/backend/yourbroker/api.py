@@ -27,7 +27,8 @@ def _need(sid: str, perm: str) -> None:
 @app.get("/api/meta")
 def meta() -> dict:
     users = [{"id": u["id"], "name": u["name"], "track": u["track"], "age": u["age"], "platforms": u.get("platforms", []),
-              "quiz": u.get("quiz")}
+              "quiz": u.get("quiz"),
+              "city": u.get("city"), "occupation": u.get("occupation"), "onboarding": u.get("onboarding"), "signup": u.get("signup")}
              for u in load_yaml("test_users.yaml")["users"]]
     dq = read_json("data_quality.json")
     return {**versions(), "notice_version": config()["versions"]["notice_version"], "permissions": ca.PERMISSIONS,

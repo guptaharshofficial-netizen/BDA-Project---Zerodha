@@ -24,7 +24,7 @@ def test_analytics_off_by_default_and_meta():
     sid = c.post("/api/session").json()["session"]
     assert c.get(f"/api/consent/{sid}").json()["consents"]["analytics"] is False
     m = c.get("/api/meta").json()
-    assert m["data_asof"] == "2026-10-30" and len(m["test_users"]) == 5
+    assert m["data_asof"] == "2026-10-30" and len(m["test_users"]) == 7
 
 
 def test_explore_and_calc():

@@ -51,5 +51,16 @@ U05:
   goals:
     - {name: "Long-term wealth", target: 3000000, years: 12, monthly: 0, priority: 1}
   suitability: {market_fall_20pct: hold, horizon: 5+ years, monthly_surplus: 25k-1L, emi_inr: 30000, emergency_months: 3}
+U07:
+  holdings:
+    - {type: fund, pick: {assumption_key: debt, category_like: "Short Duration", nth: 0}, value: 900000, label: "Short-duration debt fund"}
+    - {type: fund, pick: {assumption_key: hybrid, category_like: "Balanced Advantage", nth: 0}, value: 700000, sip_monthly: 15000, label: "Balanced-advantage fund (SIP)"}
+    - {type: fund, pick: {assumption_key: liquid, category_like: "Liquid", nth: 0}, value: 300000, label: "Liquid fund"}
+    - {type: stock, pick: {index: NIFTY_50, sector: Financial Services, nth: 4}, value: 250000}
+    - {type: stock, pick: {index: NIFTY_50, sector: FMCG, nth: 1}, value: 250000}
+  goals:
+    - {name: "Retirement corpus top-up", target: 4000000, years: 5, monthly: 15000, priority: 1}
+    - {name: "Daughter's wedding", target: 1500000, years: 3, monthly: 5000, priority: 2}
+  suitability: {market_fall_20pct: wait, horizon: 3-5 years, monthly_surplus: 25k-1L, emi_inr: 0, emergency_months: 8}
 # SIMULATED ~3 months of history for U04 (Rohan), used only by the "switch to computed profile" demo toggle.
 U04_simulated: {trades_per_month: 9, days_since_last_txn: 1, sip_share: 0.25, high_risk_share: 0.7, aum_inr: 90000, monthly_inflow_inr: 15000}

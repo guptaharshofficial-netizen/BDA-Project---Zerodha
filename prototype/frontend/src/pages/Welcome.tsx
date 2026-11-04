@@ -7,7 +7,24 @@ const BLURB: Record<string, string> = {
   U03: "61 · retired, inherited large-cap stocks",
   U04: "23 · first job, wants to start investing",
   U05: "35 · hasn't invested since 2023",
+  U06: "31 · newly married, home-loan EMI, mostly FDs",
+  U07: "55 · retires in 5 years, mostly debt and hybrid funds",
 };
+
+/* Five presentation profiles: one per investor segment found by the model, plus a new investor placed by the questionnaire.
+   Segments shown here are what the app computes for these profiles (checked against the trained model). */
+const PROFILES: { id: string; path: "new" | "existing"; seg: string; tone: string; story: string }[] = [
+  { id: "U06", path: "new", seg: "New investor → Systematic Saver", tone: "bg-emerald-50 text-emerald-800 border-emerald-200",
+    story: "CA in Mumbai, newly married, ₹38k home-loan EMI. Money sits in FDs; trades now and then but has no time to research. Wants to learn while investing." },
+  { id: "U01", path: "existing", seg: "Systematic Saver", tone: "bg-sky-50 text-sky-800 border-sky-200",
+    story: "Product designer in Bengaluru. Two flexi-cap SIPs plus four mid-cap stocks; saving for a home in 6 years, no emergency fund yet." },
+  { id: "U02", path: "existing", seg: "Active Trader", tone: "bg-rose-50 text-rose-800 border-rose-200",
+    story: "Business owner in Ludhiana. Trades about 15 times a month: six stocks (half PSU banks) plus options, ₹18 lakh idle cash. Needs a business buffer in 2 years." },
+  { id: "U07", path: "existing", seg: "Income Preserver", tone: "bg-amber-50 text-amber-800 border-amber-200",
+    story: "Senior bank officer in Visakhapatnam, retiring in about 5 years. Mostly debt and hybrid funds, two old blue-chip stocks, rarely trades." },
+  { id: "U05", path: "existing", seg: "Dormant / Just-in-time", tone: "bg-violet-50 text-violet-800 border-violet-200",
+    story: "Anaesthesiologist in Hyderabad. Stopped her SIP in 2023 and hasn't transacted in over a year; an EV smallcase and a few stocks sit untouched." },
+];
 
 export default function Welcome() {
   const { meta, startAs, startJourneyAt } = useApp();
@@ -46,6 +63,25 @@ export default function Welcome() {
           </div>
         </div>
       </div>
+
+      <section className="mt-8" aria-labelledby="profiles-h">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div><h2 id="profiles-h" className="text-lg font-semibold">Meet five investors</h2>
+            <p className="text-sm text-ink-faint">Demo profiles, one for each investor group. Every form is pre-filled; you only tap through the screens and the permission switches.</p></div>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-3">
+          {PROFILES.map((pr) => { const u = meta.test_users.find((x: any) => x.id === pr.id); if (!u) return null; return (
+            <div key={pr.id} className="bg-white border border-line rounded-lg p-4 flex flex-col">
+              <span className={`self-start text-[11px] font-semibold border rounded-full px-2 py-0.5 ${pr.tone}`}>{pr.seg}</span>
+              <div className="font-semibold mt-2">{u.name}</div>
+              <div className="text-xs text-ink-faint">{u.age} · {u.city}</div>
+              <p className="text-[13px] text-ink-soft mt-2 flex-1">{pr.story}</p>
+              <button onClick={() => startJourneyAt(pr.path, pr.path === "new" ? "kite_signup" : "kite_entry", pr.id)}
+                className="mt-3 text-sm font-semibold text-white bg-ink rounded-md px-3 py-2 hover:bg-black">Start {u.name.split(" ")[0]}'s journey →</button>
+              <button onClick={() => startAs(pr.id)} className="mt-1.5 text-xs text-brand-dark hover:underline">or skip to the permission step</button>
+            </div>); })}
+        </div>
+      </section>
 
       <div className="grid sm:grid-cols-3 gap-4 mt-6 text-sm">
         {[["Your money, your call", "We show information and options. We never tell you what to buy and never place orders."],

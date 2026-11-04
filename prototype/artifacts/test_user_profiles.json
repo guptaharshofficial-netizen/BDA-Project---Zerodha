@@ -130,5 +130,57 @@
     ],
     "cluster": 0,
     "cluster_name": "Dormant / Just-in-time"
+  },
+  {
+    "id": "U06",
+    "name": "Aditya Kulkarni",
+    "basis": "quiz (Track A)",
+    "expected": {
+      "activity": 2,
+      "automation": 4,
+      "risk": 4,
+      "capacity": 3
+    },
+    "computed": {
+      "activity": 2,
+      "automation": 4,
+      "risk": 4,
+      "capacity": 3
+    },
+    "diff": {
+      "activity": 0,
+      "automation": 0,
+      "risk": 0,
+      "capacity": 0
+    },
+    "flagged": [],
+    "cluster": 2,
+    "cluster_name": "Systematic Saver"
+  },
+  {
+    "id": "U07",
+    "name": "Vandana Rao",
+    "basis": "platform data (Track B)",
+    "expected": {
+      "activity": 1,
+      "automation": 3,
+      "risk": 1,
+      "capacity": 3
+    },
+    "computed": {
+      "activity": 1,
+      "automation": 3,
+      "risk": 1,
+      "capacity": 3
+    },
+    "diff": {
+      "activity": 0,
+      "automation": 0,
+      "risk": 0,
+      "capacity": 0
+    },
+    "flagged": [],
+    "cluster": 3,
+    "cluster_name": "Income Preserver"
   }
 ]
