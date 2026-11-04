@@ -1,6 +1,6 @@
 /* Screens and parts for the separate-adviser setup: Tulana Advisory (a SEBI-registered adviser) reached from Kite / Coin.
    Kite screens here are clearly labelled mock-ups; the prototype never places orders. */
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useApp } from "../App";
 import { Json } from "../api";
 import { appLink, Badge, Button, Card, Handoff, Info, Modal, RecCard, RISK_WORDS, Toggle } from "../ui";
@@ -213,6 +213,14 @@ export function ConsentBody({ existing, onDone, onSkip, demo }: { existing: bool
   const { meta, consents, grant, kiteLinked } = useApp();
   const n = meta.notice;
   const need = existing ? ["profile", "portfolio"] : ["profile"];
+  // Demo: the required switches arrive pre-filled (C1 for new investors, C1 + C2 for existing). Done once when the screen
+  // opens and saved through the normal consent call, so consent IDs and the audit log are still recorded. Analytics stays off.
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (prefilled.current) return;
+    prefilled.current = true;
+    (async () => { for (const p of need) if (!consents[p]) await grant(p, true); })();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const rows: [string, string, string][] = [
     ["profile", "C1 · Use my answers", "Money, goals and risk answers, used to build your profile and check what suits you."],
     ...(existing ? [["portfolio", "C2 · Use my linked Kite and Coin data", "Holdings, positions and SIPs you allowed Zerodha to share. Used to analyse your portfolio and place you in a peer group."] as [string, string, string]] : []),
@@ -221,6 +229,7 @@ export function ConsentBody({ existing, onDone, onSkip, demo }: { existing: bool
   return (
     <div>
       <p className="text-sm text-ink-soft">Tulana's own notice. Choose what you're happy to share; you can change it anytime in <b>Settings</b>. Saying no never affects your Kite or Coin account.</p>
+      <p className="text-xs text-ink-faint mt-2">Pre-filled for the demo: the switches needed to continue are on. Switch off anything you don't want to share.</p>
       {existing && !kiteLinked && demo && <p className="text-xs text-ink-faint mt-2">Demo shortcut: this assumes you've already allowed Zerodha to share your Kite data with Tulana.</p>}
       {!existing && <div className="mt-3"><Info>C2 (use your Kite and Coin activity) is asked later, only once your Kite account is active and you allow the data link. Until then we use your answers.</Info></div>}
       <div className="mt-4 space-y-3">
